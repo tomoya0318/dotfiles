@@ -1,0 +1,24 @@
+# --- chezmoi 管理・ビルド用ファイル ---
+# これらはホームディレクトリには展開せず、ソースディレクトリ内でのみ使用する
+README.md
+package.json
+pnpm-lock.yaml
+.secretlintrc.json
+.gitignore
+node_modules/
+
+# --- 環境ごとの展開制御 ---
+# Mac (darwin) 以外では、Mac特有の設定ファイルを展開しない
+{{ if ne .chezmoi.os "darwin" }}
+.config/karabiner/
+raycast_scripts/
+{{ end }}
+
+# --- Mac特有の不要ファイルを全体で除外 ---
+**/.DS_Store
+
+# Neovim フォルダ内の不要なものを展開・管理対象から除外
+.config/nvim/data/
+.config/nvim/doc/tags
+.config/nvim/*.log
+.config/nvim/debug
