@@ -1,0 +1,9 @@
+# Claude Code 月次按分レポート 設定
+# このファイルを .env にコピーして値を設定してください
+# .env は git 管理外（.gitignore に記載済み）
+
+# レポートの保存先ディレクトリ（空の場合は画面表示のみ）
+REPORT_OUTPUT_DIR=
+
+# 事業用フォルダ設定ファイルのパス
+BUSINESS_FOLDERS_CONF=~/.claude/skills/monthly-report/config/business-folders.conf

@@ -1,0 +1,10 @@
+# 事業用フォルダ設定
+# このファイルを business-folders.conf にコピーして編集してください
+# .conf は git 管理外（.gitignore に記載済み）
+#
+# ルール:
+# - 1行1パス（絶対パス）
+# - 前方一致で判定（サブフォルダも自動的に事業用扱い）
+# - # 始まりの行はコメント
+
+/Users/YOUR_USERNAME/dev/your-project
