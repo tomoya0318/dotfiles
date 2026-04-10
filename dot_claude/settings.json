@@ -1,35 +1,115 @@
 {
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/notification.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "osascript -e 'tell application \"cmux\" to activate'"
-          }
-        ]
-      }
-    ]
-  },
+  "includeCoAuthoredBy": false,
+  "model": "claude-opus-4-6",
+  "effortLevel": "high",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",
     "padding": 2
   },
-  "language": "日本語",
+  "enabledPlugins": {
+    "code-simplifier@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  },
   "alwaysThinkingEnabled": true,
-  "autoUpdatesChannel": "stable",
-  "feedbackSurveyState": {
-    "lastShownTime": 1754049841773
+  "language": "日本語",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notification.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notification.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(mkdir *)",
+      "Bash(touch *)",
+      "Bash(ls *)",
+      "Bash(tree *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(echo *)",
+      "Bash(pnpm *)",
+      "Write(**/plan.md)",
+      "Write(**/prompt.md)",
+      "Edit(**/plan.md)",
+      "Edit(**/prompt.md)",
+      "mcp__figma-dev-mode-mcp-server__get_screenshot",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__fill_form",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__select_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__evaluate_script",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__get_network_request",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__wait_for",
+      "mcp__chrome-devtools__press_key",
+      "mcp__chrome-devtools__list_pages"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(git reset *)",
+      "Bash(git rebase *)",
+      "Read(id_rsa)",
+      "Read(id_ed25519)",
+      "Read(**/*token*)",
+      "Read(**/*key*)",
+      "Bash(rm -rf *)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf ~/*)",
+      "Bash(rm -rf /*)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.development)",
+      "Read(.env.production)",
+      "Read(**/.env)",
+      "Read(**/.env.local)",
+      "Read(**/.env.development)",
+      "Read(**/.env.production)",
+      "Read(**/*secret*)",
+      "Write(.env)",
+      "Write(.env.local)",
+      "Write(.env.development)",
+      "Write(.env.production)",
+      "Write(**/.env)",
+      "Write(**/.env.local)",
+      "Write(**/.env.development)",
+      "Write(**/.env.production)",
+      "Write(**/*secret*)"
+    ],
+    "ask": [
+      "Bash(rm *)",
+      "Bash(chmod *)",
+      "Bash(wget *)",
+      "Bash(curl *)",
+      "Bash(git merge *)"
+    ]
   }
 }
