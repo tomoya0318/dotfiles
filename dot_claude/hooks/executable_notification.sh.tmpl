@@ -22,3 +22,12 @@ case "$hook_event" in
 esac
 
 terminal-notifier -title "Claude Code" -subtitle "$project" -message "$message" -sound "Ping"
+
+# ntfy通知（スマホ）
+NTFY_TOPIC="{{ .ntfy.topic }}"
+if [ -n "$NTFY_TOPIC" ]; then
+  curl -s \
+    -H "Title: Claude Code - $project" \
+    -d "$message" \
+    "https://ntfy.sh/$NTFY_TOPIC" > /dev/null 2>&1 &
+fi

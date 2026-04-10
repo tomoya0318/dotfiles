@@ -4,3 +4,6 @@
 [data.git]
     name = "Your Name"
     email = "your.email@example.com"
+
+[data.ntfy]
+    topic = "your-ntfy-topic"
