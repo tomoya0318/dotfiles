@@ -1,44 +1,6 @@
 {
   "includeCoAuthoredBy": false,
-  "model": "claude-opus-4-6",
-  "effortLevel": "high",
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh",
-    "padding": 2
-  },
-  "enabledPlugins": {
-    "code-simplifier@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
-  },
-  "alwaysThinkingEnabled": true,
-  "language": "日本語",
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/notification.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/notification.sh"
-          }
-        ]
-      }
-    ]
-  },
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(mkdir *)",
       "Bash(touch *)",
@@ -51,6 +13,7 @@
       "Bash(find *)",
       "Bash(echo *)",
       "Bash(pnpm *)",
+      "Bash(trash *)",
       "Write(**/plan.md)",
       "Write(**/prompt.md)",
       "Edit(**/plan.md)",
@@ -110,6 +73,44 @@
       "Bash(wget *)",
       "Bash(curl *)",
       "Bash(git merge *)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notification.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notification.sh"
+          }
+        ]
+      }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh",
+    "padding": 2
+  },
+  "enabledPlugins": {
+    "code-simplifier@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
+  },
+  "language": "日本語",
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh"
 }
