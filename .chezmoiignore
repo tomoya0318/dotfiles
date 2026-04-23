@@ -17,6 +17,10 @@ raycast_scripts/
 # --- Mac特有の不要ファイルを全体で除外 ---
 **/.DS_Store
 
+# --- Python bytecode ---
+**/__pycache__/
+**/*.pyc
+
 # Neovim フォルダ内の不要なものを展開・管理対象から除外
 .config/nvim/data/
 .config/nvim/doc/tags
