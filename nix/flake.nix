@@ -13,19 +13,25 @@
   #   cd nix/
   #   cp local.nix.example local.nix      # 初回のみ: ホームパスを記述
   #   nix run home-manager/release-24.11 -- switch --flake .#research
+  #
+  # ファイル構成:
+  #   home-common.nix   両 OS 共通の設定 (packages, programs)
+  #   home-research.nix Linux/研究サーバ固有 (現時点では未使用、必要になれば作成)
+  #   home-mac.nix      Mac 固有 (将来)
+  #   local.nix         マシン固有 (homeDirectory 等、.gitignore で除外)
   outputs = { nixpkgs, home-manager, ... }: {
     homeConfigurations = {
       "research" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         modules = [
-          ./home-research.nix
+          ./home-common.nix
           ./local.nix
         ];
       };
       # 将来 Mac 用プロファイルを追加する場合:
       # "mac" = home-manager.lib.homeManagerConfiguration {
       #   pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-      #   modules = [ ./home-mac.nix ./local.nix ];
+      #   modules = [ ./home-common.nix ./home-mac.nix ./local.nix ];
       # };
     };
   };
