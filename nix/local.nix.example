@@ -1,0 +1,14 @@
+# このファイルを local.nix にコピーしてユーザ固有の設定を記述します:
+#   cp local.nix.example local.nix
+#
+# local.nix は .gitignore で除外されるためリポジトリに含まれません。
+{
+  home.username = "your-username";
+  home.homeDirectory = "/path/to/home";
+
+  # 個人用 Git 設定 (任意)
+  # programs.git = {
+  #   userName = "Your Name";
+  #   userEmail = "you@example.com";
+  # };
+}

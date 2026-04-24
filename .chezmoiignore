@@ -6,6 +6,7 @@ pnpm-lock.yaml
 .secretlintrc.json
 .gitignore
 node_modules/
+nix/
 
 # --- 環境ごとの展開制御 ---
 # Mac (darwin) 以外では、Mac特有の設定ファイルを展開しない
