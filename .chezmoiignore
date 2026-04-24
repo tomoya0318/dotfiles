@@ -10,12 +10,15 @@ nix/
 
 # --- 環境ごとの展開制御 ---
 # Mac (darwin) 以外では、Mac特有の設定ファイルを展開しない
+# .zshrc / .gitconfig は Linux では home-manager が生成するため chezmoi からは展開しない
 {{ if ne .chezmoi.os "darwin" }}
 .config/karabiner/
 raycast_scripts/
 scripts/
 Brewfile
 Brewfile.mobile
+.zshrc
+.gitconfig
 {{ end }}
 
 # --- Mac特有の不要ファイルを全体で除外 ---

@@ -102,6 +102,41 @@ infocmp -x | ssh <host> -- tic -x -
 
 これでサーバの `~/.terminfo/x/xterm-ghostty` にコンパイル済み terminfo が配置される。SSH 再接続後から効く。
 
+### 9. chezmoi で追加 dotfiles を展開 (nvim / Claude Code 設定)
+
+home-manager は `home-common.nix` に宣言されたものしか配置しない。書き換えが発生する設定 (LazyVim の `lazy-lock.json`、Claude Code の `settings.json` 等) は chezmoi 側で管理しているため、`chezmoi apply` で展開する:
+
+```bash
+# chezmoi の source directory を ~/dotfiles に向ける
+mkdir -p ~/.local/share
+ln -s ~/dotfiles ~/.local/share/chezmoi
+
+# 展開プレビュー (何が展開されるか事前確認)
+chezmoi diff
+
+# 問題なければ展開
+chezmoi apply
+```
+
+展開対象 (Linux 環境):
+- `~/.config/nvim/` (LazyVim 設定)
+- `~/.claude/` (Claude Code の設定・hooks・skills)
+
+`.zshrc` / `.gitconfig` は `.chezmoiignore` の Linux 向け除外で展開されない (home-manager が生成)。
+
+### 10. Claude Code にログイン (サブスクの場合)
+
+```bash
+claude login
+```
+
+Device Flow 方式なので、ターミナルに URL + コードが表示される:
+1. 表示された URL を Mac のブラウザで開く
+2. コードを入力して認証
+3. ターミナルに戻り、認証完了を確認
+
+認証情報は `~/.claude/.credentials.json` (mode 0600) に保存される。共有サーバでは sudo を持つ他メンバーから読める可能性があることは認識しておく。
+
 ---
 
 ## 環境完全初期化 (teardown)

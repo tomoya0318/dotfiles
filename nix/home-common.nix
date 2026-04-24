@@ -1,17 +1,20 @@
-{ pkgs, ... }: {
+{ pkgs, pkgs-unstable, ... }: {
   home.username = "tomoya-n";
   home.homeDirectory =
     if pkgs.stdenv.isDarwin then "/Users/tomoya-n"
     else "/mnt/data1/tomoya-n";
   home.stateVersion = "24.11";
 
-  home.packages = with pkgs; [
+  home.packages = (with pkgs; [
     git
     fzf
     ripgrep
     fd
     jq
     neovim
+    chezmoi
+  ]) ++ [
+    pkgs-unstable.claude-code
   ];
 
   programs.zsh = {
