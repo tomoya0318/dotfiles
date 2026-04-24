@@ -30,3 +30,4 @@ Brewfile.mobile
 .config/nvim/doc/tags
 .config/nvim/*.log
 .config/nvim/debug
+.config/nvim/spell/*.spl

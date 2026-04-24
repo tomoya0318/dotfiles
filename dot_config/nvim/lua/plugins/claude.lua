@@ -1,0 +1,40 @@
+return {
+  -- 1. 日本語入力の自動切り替え (im-select)
+  {
+    "keaising/im-select.nvim",
+    config = function()
+      require("im_select").setup({
+        -- Macでの動作を安定させる設定
+        default_command = "im-select",
+        set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
+        set_previous_events = { "InsertEnter" },
+        async_switch_im = true,
+      })
+    end,
+  },
+
+  -- 2. Claude Code 用の隔離ターミナル (Toggleterm)
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    opts = {
+      open_mapping = [[<c-\>]], -- Ctrl + \ で開閉
+      direction = "float", -- 画面中央に浮く
+      float_opts = { border = "curved" }, -- 角丸の枠
+      start_in_insert = true, -- 開いたらすぐ入力モード
+    },
+  },
+
+  -- 3. 差分レビュー用 (Diffview)
+  {
+    "sindrets/diffview.nvim",
+    opts = {
+      enhanced_diff_hl = true,
+    },
+    keys = {
+      { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Git Diff Review" },
+      { "<leader>gx", "<cmd>DiffviewClose<cr>", desc = "Close Diff Review" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "File History" },
+    },
+  },
+}
