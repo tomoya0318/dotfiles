@@ -1,11 +1,13 @@
 return {
-  -- 1. 日本語入力の自動切り替え (im-select)
+  -- 1. 日本語入力の自動切り替え (im-select) - Mac のみ
+  -- Linux (SSH 先の研究サーバ等) では IME 切替は client 側 (Mac) の責務なので無効化
   {
     "keaising/im-select.nvim",
+    enabled = function() return vim.fn.has("mac") == 1 end,
     config = function()
       require("im_select").setup({
-        -- Macでの動作を安定させる設定
-        default_command = "im-select",
+        -- Mac では macism (nixpkgs 版) を使う
+        default_command = "macism",
         set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
         set_previous_events = { "InsertEnter" },
         async_switch_im = true,
