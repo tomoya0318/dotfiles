@@ -1,0 +1,17 @@
+#!/bin/bash
+# flake.nix / home-common.nix / home-mac.nix の内容が変わったら再実行:
+# flake:      {{ include "nix/flake.nix" | sha256sum }}
+# common:     {{ include "nix/home-common.nix" | sha256sum }}
+{{- if eq .chezmoi.os "darwin" }}
+# mac:        {{ include "nix/home-mac.nix" | sha256sum }}
+set -euo pipefail
+
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+
+echo ">>> home-manager switch を適用 (flake: {{ .chezmoi.sourceDir }}/nix#mac)"
+nix run home-manager/release-24.11 -- switch \
+  --flake "{{ .chezmoi.sourceDir }}/nix#mac" \
+  -b bak
+{{- end }}

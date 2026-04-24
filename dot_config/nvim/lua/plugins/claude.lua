@@ -6,8 +6,8 @@ return {
     enabled = function() return vim.fn.has("mac") == 1 end,
     config = function()
       require("im_select").setup({
-        -- Mac では macism (nixpkgs 版) を使う
-        default_command = "macism",
+        -- im-select CLI は brew 管理 (daipeihust/tap/im-select)
+        default_command = "im-select",
         set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
         set_previous_events = { "InsertEnter" },
         async_switch_im = true,

@@ -13,7 +13,7 @@
 
     # Mac 固有
     terminal-notifier
-    macism  # IME 切替 (nvim の im-select.nvim が呼ぶ)
+    # IME 切替 (im-select) は nixpkgs に代替が無いため brew 継続
   ];
 
   programs.direnv = {

@@ -1,0 +1,22 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+set -euo pipefail
+
+if ! command -v nix >/dev/null 2>&1; then
+  echo ">>> Nix が未インストール、Determinate Installer でセットアップします"
+  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
+    sh -s -- install --no-confirm
+  if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  fi
+else
+  echo ">>> Nix 導入済み: $(nix --version)"
+fi
+
+# flakes 有効化
+mkdir -p "$HOME/.config/nix"
+if ! grep -q "experimental-features" "$HOME/.config/nix/nix.conf" 2>/dev/null; then
+  echo "experimental-features = nix-command flakes" >> "$HOME/.config/nix/nix.conf"
+  echo ">>> ~/.config/nix/nix.conf に flakes 有効化を追記"
+fi
+{{- end }}
