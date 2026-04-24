@@ -11,11 +11,11 @@
     ripgrep
     fd
     jq
-    neovim
     chezmoi
-  ]) ++ [
-    pkgs-unstable.claude-code
-  ];
+  ]) ++ (with pkgs-unstable; [
+    claude-code
+    neovim  # LazyVim が Neovim >= 0.11.2 を要求するため unstable から取得
+  ]);
 
   programs.zsh = {
     enable = true;
