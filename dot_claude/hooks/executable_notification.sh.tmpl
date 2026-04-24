@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# 【重要】Hookから実行されてもHomebrewのコマンドを使えるようにPATHを通す
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# 【重要】Hookから実行されてもコマンドを解決できるようにPATHを通す
+# Mac は Homebrew を先頭に、Linux は Nix user profile のみ
+export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:/usr/local/bin:{{ end }}$HOME/.nix-profile/bin:$PATH"
 
 input=$(cat)
 
@@ -21,10 +22,13 @@ case "$hook_event" in
     ;;
 esac
 
-terminal-notifier -title "Claude Code" -subtitle "$project" -message "$message" -sound "Ping"
+# macOS デスクトップ通知 (terminal-notifier が入っていれば)
+if command -v terminal-notifier >/dev/null 2>&1; then
+  terminal-notifier -title "Claude Code" -subtitle "$project" -message "$message" -sound "Ping"
+fi
 
-# ntfy通知（スマホ）
-NTFY_TOPIC="{{ .ntfy.topic }}"
+# ntfy通知（スマホ） chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる
+NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"
 if [ -n "$NTFY_TOPIC" ]; then
   curl -s \
     -H "Title: Claude Code - $project" \
