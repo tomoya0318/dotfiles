@@ -1,13 +1,18 @@
 #!/bin/bash
-# Read JSON from stdin
+# Read JSON from stdin and extract all fields in a single jq call
 input=$(cat)
+eval "$(echo "$input" | jq -r '
+  @sh "cwd=\(.workspace.current_dir // .cwd // "")",
+  @sh "model=\(.model.display_name // "Unknown")",
+  @sh "used_pct_raw=\(.context_window.used_percentage // "")",
+  @sh "five_pct=\(.rate_limits.five_hour.used_percentage // "")",
+  @sh "five_reset=\(.rate_limits.five_hour.resets_at // "")",
+  @sh "seven_pct=\(.rate_limits.seven_day.used_percentage // "")",
+  @sh "seven_reset=\(.rate_limits.seven_day.resets_at // "")"
+')"
 
 # --- Line 1: Current folder path ---
-cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
-# Replace $HOME with ~
-home_escaped=$(echo "$HOME" | sed 's|/|\\/|g')
-display_path=$(echo "$cwd" | sed "s|^$HOME|~|")
-echo "📁 $display_path"
+echo "📁 ${cwd/#$HOME/~}"
 
 # --- Line 2: Git repo and branch (only when inside a git repo) ---
 if git -C "$cwd" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
@@ -18,6 +23,7 @@ if git -C "$cwd" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     # --- Worktrees (only when additional worktrees exist) ---
     worktree_line=""
     while IFS= read -r wt_path; do
+        [ -z "$wt_path" ] && continue
         wt_branch=$(git -C "$wt_path" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null || git -C "$wt_path" rev-parse --short HEAD 2>/dev/null)
         if [ -n "$worktree_line" ]; then
             worktree_line="${worktree_line} | 🌲 $wt_branch"
@@ -25,47 +31,30 @@ if git -C "$cwd" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
             worktree_line="🌲 $wt_branch"
         fi
     done < <(git -C "$cwd" worktree list --porcelain 2>/dev/null \
-        | grep '^worktree ' \
-        | awk '{print $2}' \
+        | awk '/^worktree /{print $2}' \
         | tail -n +2)
     [ -n "$worktree_line" ] && echo "$worktree_line"
 fi
 
 # --- Line 3: Context bar and model ---
-model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
-used_pct_raw=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
-
 if [ -n "$used_pct_raw" ]; then
-    # Round to integer
     used_int=$(printf "%.0f" "$used_pct_raw")
-
-    # Build a 20-character progress bar
-    bar_width=20
-    filled=$(( used_int * bar_width / 100 ))
-    empty=$(( bar_width - filled ))
-    bar=""
-    for i in $(seq 1 $filled); do bar="${bar}█"; done
-    for i in $(seq 1 $empty);  do bar="${bar}░"; done
-
+    filled=$(( used_int * 20 / 100 ))
+    empty=$(( 20 - filled ))
+    bar=$(printf '%*s' "$filled" '' | tr ' ' '█')$(printf '%*s' "$empty" '' | tr ' ' '░')
     echo "🧠 [${bar}] ${used_int}% | 💪 $model"
 else
-    echo "🧠 [--------------------]  --% | 💪 $model"
+    echo "🧠 [░░░░░░░░░░░░░░░░░░░░]  --% | 💪 $model"
 fi
 
 # --- Line 4: Rate limits (only when data is available) ---
-five_pct=$(echo "$input"  | jq -r '.rate_limits.five_hour.used_percentage  // empty')
-five_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at        // empty')
-seven_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage  // empty')
-seven_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at       // empty')
-
 if [ -n "$five_pct" ] || [ -n "$seven_pct" ]; then
     line4="💰"
 
     if [ -n "$five_pct" ]; then
         five_int=$(printf "%.0f" "$five_pct")
         if [ -n "$five_reset" ]; then
-            reset_time=$(date -r "$five_reset" "+%H:%M" 2>/dev/null || date -d "@$five_reset" "+%H:%M" 2>/dev/null)
-            line4="${line4} 5h ${five_int}% (🔄 ${reset_time})"
+            line4="${line4} 5h ${five_int}% (🔄 $(date -r "$five_reset" "+%H:%M" 2>/dev/null))"
         else
             line4="${line4} 5h ${five_int}%"
         fi
@@ -74,8 +63,7 @@ if [ -n "$five_pct" ] || [ -n "$seven_pct" ]; then
     if [ -n "$seven_pct" ]; then
         seven_int=$(printf "%.0f" "$seven_pct")
         if [ -n "$seven_reset" ]; then
-            reset_dt=$(date -r "$seven_reset" "+%m/%d %H:%M" 2>/dev/null || date -d "@$seven_reset" "+%m/%d %H:%M" 2>/dev/null)
-            line4="${line4} | 7d ${seven_int}% (🔄 ${reset_dt})"
+            line4="${line4} | 7d ${seven_int}% (🔄 $(date -r "$seven_reset" "+%m/%d %H:%M" 2>/dev/null))"
         else
             line4="${line4} | 7d ${seven_int}%"
         fi
