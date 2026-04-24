@@ -12,11 +12,13 @@ cat <<EOF
   4. /nix の bind mount を解除 (sudo)
   5. /etc/fstab から /nix 行を削除 (sudo)
   6. /mnt/data1/<user>/nix (Nix store 実体) を削除
+  7. ~/.local/share/chezmoi symlink を削除 (存在すれば)
 
 残るもの:
   - ~/.terminfo (Ghostty 用等)
   - ~/dotfiles (手動で削除してください)
   - ~/.zshrc.bak などバックアップファイル群
+  - ~/.config/nvim ~/.claude など chezmoi apply で展開したファイル群
 
 EOF
 read -r -p "続行しますか？ [yes/N] " yn
@@ -64,12 +66,19 @@ if [ -d "$NIX_STORE_REAL" ]; then
     echo "✓ $NIX_STORE_REAL を削除"
 fi
 
+# --- 7. chezmoi source symlink を削除 ---
+if [ -L "$HOME/.local/share/chezmoi" ]; then
+    rm "$HOME/.local/share/chezmoi"
+    echo "✓ chezmoi source symlink を削除"
+fi
+
 cat <<EOF
 
 === 完了 ===
 
 必要なら以下を手動で復元/削除してください:
-  mv ~/.zshrc.bak ~/.zshrc                  (バックアップ復元)
-  mv ~/.bash_profile.bak ~/.bash_profile    (バックアップ復元)
-  rm -rf ~/dotfiles                          (dotfiles リポを削除)
+  mv ~/.zshrc.bak ~/.zshrc                    (バックアップ復元)
+  mv ~/.bash_profile.bak ~/.bash_profile      (バックアップ復元)
+  rm -rf ~/dotfiles                            (dotfiles リポを削除)
+  rm -rf ~/.config/nvim ~/.claude              (chezmoi 展開ファイルを削除)
 EOF
