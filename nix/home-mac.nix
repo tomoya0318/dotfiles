@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }: {
   home.packages = with pkgs; [
     # brew formula からの移行
-    awscli
+    awscli2  # v2 (brew 版と同世代、aws コマンドとして動作)
     cmake
     coreutils
     curl
