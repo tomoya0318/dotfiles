@@ -1,4 +1,5 @@
 { pkgs, ... }: {
+  home.username = "tomoya-n";
   home.stateVersion = "24.11";
 
   home.packages = with pkgs; [
@@ -33,5 +34,9 @@
 
   programs.starship.enable = true;
   programs.fzf.enable = true;
-  programs.git.enable = true;
+  programs.git = {
+    enable = true;
+    userName = "tomoya0318";
+    userEmail = "tmox13e@gmail.com";
+  };
 }
