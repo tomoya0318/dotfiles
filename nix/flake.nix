@@ -21,8 +21,15 @@
   #   home-mac.nix      Mac 固有 (将来)
   outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
+      # unfree ライセンスのパッケージ (claude-code 等) を明示的に許可する
+      allowedUnfree = [ "claude-code" ];
+      mkUnstablePkgs = system: import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfreePredicate = pkg:
+          builtins.elem (nixpkgs-unstable.lib.getName pkg) allowedUnfree;
+      };
       mkExtraArgs = system: {
-        pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
+        pkgs-unstable = mkUnstablePkgs system;
       };
     in {
       homeConfigurations = {
