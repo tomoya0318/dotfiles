@@ -12,6 +12,9 @@ node_modules/
 {{ if ne .chezmoi.os "darwin" }}
 .config/karabiner/
 raycast_scripts/
+scripts/
+Brewfile
+Brewfile.mobile
 {{ end }}
 
 # --- Mac特有の不要ファイルを全体で除外 ---

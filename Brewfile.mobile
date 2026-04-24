@@ -1,0 +1,17 @@
+# RN / iOS / Android 開発環境
+# 使うとき:
+#   brew bundle --file=~/Brewfile.mobile
+#   ~/scripts/setup-mobile.sh         # Android SDK コンポーネントなど
+#
+# 使い終わって片付けたいとき:
+#   brew bundle cleanup --file=~/Brewfile.mobile --force
+
+# --- iOS (CocoaPods) ---
+brew "cocoapods"
+brew "ruby-build"
+
+# --- React Native ---
+brew "watchman"
+
+# --- Android (JDK) ---
+cask "zulu@17"

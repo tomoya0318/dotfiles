@@ -16,11 +16,15 @@ HOMEBREW_DIR=${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null)}
 # 2. Android & Java Environment
 # ==========================================
 # 開発用Macだけで読み込む限定設定 (ホスト名で指定)
+# RN/Android 環境は Brewfile.mobile 適用時のみ有効 (未インストール時は PATH を汚さない)
 {{- if eq .chezmoi.hostname "MacBook-Pro-2" }}
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/platform-tools
+if [ -d /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home ]; then
+    export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+fi
+if [ -d "$HOME/Library/Android/sdk" ]; then
+    export ANDROID_HOME=$HOME/Library/Android/sdk
+    export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
+fi
 {{- end }}
 
 # ==========================================
