@@ -1,5 +1,5 @@
-{ config, pkgs, lib, ... }: {
-  home.packages = with pkgs; [
+{ config, pkgs, pkgs-unstable, lib, ... }: {
+  home.packages = (with pkgs; [
     # brew formula からの移行
     awscli2  # v2 (brew 版と同世代、aws コマンドとして動作)
     cmake
@@ -13,7 +13,10 @@
 
     # Mac 固有
     terminal-notifier
-    # IME 切替 (im-select) は nixpkgs に代替が無いため brew 継続
+  ]) ++ [
+    # IME 切替 (nvim の im-select.nvim が呼ぶ CLI)
+    # nixpkgs 24.11 には無いが unstable にあるため pkgs-unstable から取得
+    pkgs-unstable.macism
   ];
 
   programs.direnv = {
