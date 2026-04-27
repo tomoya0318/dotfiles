@@ -19,7 +19,7 @@
   # ファイル構成:
   #   home-common.nix   両 OS 共通の設定 (packages, programs, home.homeDirectory は OS 分岐)
   #   home-mac.nix      Mac 固有 (brew formula 移行分、RN/Android env、OrbStack 等)
-  #   home-research.nix Linux/研究サーバ固有 (現時点では未使用、必要になれば作成)
+  #   home-research.nix Linux/研究サーバ固有 (claude-code 等、Nix で入れる Linux 専用)
   outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
       # unfree ライセンスのパッケージ (claude-code 等) を明示的に許可する
@@ -39,6 +39,7 @@
           extraSpecialArgs = mkExtraArgs "x86_64-linux";
           modules = [
             ./home-common.nix
+            ./home-research.nix
           ];
         };
         "mac" = home-manager.lib.homeManagerConfiguration {

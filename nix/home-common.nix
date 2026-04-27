@@ -13,9 +13,11 @@
     jq
     chezmoi
   ]) ++ (with pkgs-unstable; [
-    claude-code
     neovim  # LazyVim が Neovim >= 0.11.2 を要求するため unstable から取得
   ]);
+  # claude-code は OS で扱いを分ける:
+  #   Linux (研究サーバ): home-research.nix で Nix 管理
+  #   Mac:                Anthropic 公式インストーラで ~/.local/bin/claude 管理
 
   programs.zsh = {
     enable = true;

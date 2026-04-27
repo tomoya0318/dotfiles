@@ -8,7 +8,8 @@ Mac と Linux 環境を Nix + Home Manager で宣言的に管理する flake。
 |---|---|
 | `flake.nix` | エントリポイント。`homeConfigurations.research` (Linux) と `mac` を定義 |
 | `home-common.nix` | 両 OS 共通設定 (packages, programs.zsh/starship/fzf/git)。`home.homeDirectory` は `stdenv.isDarwin` で OS 分岐 |
-| `home-mac.nix` | Mac 固有設定 (brew 移行 CLI, RN/Android env, OrbStack 等) |
+| `home-mac.nix` | Mac 固有設定 (brew 移行 CLI, macism, RN/Android env, OrbStack 等) |
+| `home-research.nix` | Linux/研究サーバ固有 (claude-code 等、Mac は公式インストーラ採用のため対象外) |
 | `flake.lock` | 入力パッケージのバージョンを pin (nixpkgs 24.11, unstable, home-manager) |
 | `teardown-server.sh` | 研究サーバ上の環境を完全に撤去する shell スクリプト |
 | `../.chezmoiscripts/` | Mac 自動セットアップ用の chezmoi スクリプト (Homebrew/Nix install, home-manager switch, brew bundle) |
@@ -37,10 +38,19 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tomoya0318
 
 ### bootstrap 後のオプション
 
-**Claude Code サブスクログイン**:
+**Claude Code セットアップ** (Mac は公式インストーラ採用):
+
 ```bash
+# Anthropic 公式インストーラで ~/.local/bin/claude に install
+curl -fsSL https://claude.ai/install.sh | bash
+
+# サブスクログイン
 claude login
 ```
+
+> Mac で Nix 経由 (`pkgs-unstable.claude-code`) を使わない理由:
+> 公式版が常に最新 (unstable lock より早い)、cmux.app 等の他ツールとの統合
+> もスムーズなため。研究サーバ (Linux) のほうは Nix 管理 (`home-research.nix`)。
 
 **RN / iOS / Android 開発する場合**:
 ```bash
