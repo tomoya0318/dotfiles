@@ -55,10 +55,16 @@ fi
 if [ -n "$five_pct" ] || [ -n "$seven_pct" ]; then
     line4="💰"
 
+    # BSD date は `-r EPOCH`、GNU date は `-d "@EPOCH"` で Unix epoch を扱う。
+    # PATH 上に GNU coreutils が来ても動くよう両方試す。
+    fmt_epoch() {
+        date -r "$1" "+$2" 2>/dev/null || date -d "@$1" "+$2" 2>/dev/null
+    }
+
     if [ -n "$five_pct" ]; then
         five_int=$(printf "%.0f" "$five_pct")
         if [ -n "$five_reset" ]; then
-            line4="${line4} 5h ${five_int}% (🔄 $(date -r "$five_reset" "+%H:%M" 2>/dev/null))"
+            line4="${line4} 5h ${five_int}% (🔄 $(fmt_epoch "$five_reset" "%H:%M"))"
         else
             line4="${line4} 5h ${five_int}%"
         fi
@@ -67,7 +73,7 @@ if [ -n "$five_pct" ] || [ -n "$seven_pct" ]; then
     if [ -n "$seven_pct" ]; then
         seven_int=$(printf "%.0f" "$seven_pct")
         if [ -n "$seven_reset" ]; then
-            line4="${line4} | 7d ${seven_int}% (🔄 $(date -r "$seven_reset" "+%m/%d %H:%M" 2>/dev/null))"
+            line4="${line4} | 7d ${seven_int}% (🔄 $(fmt_epoch "$seven_reset" "%m/%d %H:%M"))"
         else
             line4="${line4} | 7d ${seven_int}%"
         fi
