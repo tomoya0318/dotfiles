@@ -1,6 +1,7 @@
 # --- chezmoi 管理・ビルド用ファイル ---
 # これらはホームディレクトリには展開せず、ソースディレクトリ内でのみ使用する
 README.md
+TODO.md
 package.json
 pnpm-lock.yaml
 .secretlintrc.json
