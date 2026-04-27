@@ -41,7 +41,11 @@ if [ -n "$used_pct_raw" ]; then
     used_int=$(printf "%.0f" "$used_pct_raw")
     filled=$(( used_int * 20 / 100 ))
     empty=$(( 20 - filled ))
-    bar=$(printf '%*s' "$filled" '' | tr ' ' '█')$(printf '%*s' "$empty" '' | tr ' ' '░')
+    # tr は byte 単位の処理で UTF-8 マルチバイト文字 (█ 等) を壊すので
+    # bash の loop で組み立てる
+    bar=""
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    for ((i=0; i<empty; i++)); do bar+="░"; done
     echo "🧠 [${bar}] ${used_int}% | 💪 $model"
 else
     echo "🧠 [░░░░░░░░░░░░░░░░░░░░]  --% | 💪 $model"
