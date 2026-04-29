@@ -1,0 +1,5 @@
+pre-commit:
+  parallel: true
+  commands:
+    secretlint:
+      run: pnpm exec secretlint {staged_files}

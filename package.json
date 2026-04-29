@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "packageManager": "pnpm@10.19.0",
+  "scripts": {
+    "secretlint": "secretlint \"**/*\""
+  },
+  "devDependencies": {
+    "@secretlint/secretlint-rule-preset-recommend": "^11.3.1",
+    "secretlint": "^11.3.1"
+  }
+}

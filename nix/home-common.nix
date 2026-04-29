@@ -7,6 +7,7 @@
 
   home.packages = (with pkgs; [
     git
+    lefthook
     fzf
     ripgrep
     fd
