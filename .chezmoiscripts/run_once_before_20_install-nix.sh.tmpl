@@ -1,6 +1,6 @@
 #!/bin/bash
-{{- if eq .chezmoi.os "darwin" }}
 set -euo pipefail
+{{- if eq .chezmoi.os "darwin" }}
 
 if ! command -v nix >/dev/null 2>&1; then
   echo ">>> Nix が未インストール、Determinate Installer でセットアップします"
@@ -13,10 +13,23 @@ else
   echo ">>> Nix 導入済み: $(nix --version)"
 fi
 
-# flakes 有効化
+# flakes 有効化 (Mac のみ user-level 設定)
 mkdir -p "$HOME/.config/nix"
 if ! grep -q "experimental-features" "$HOME/.config/nix/nix.conf" 2>/dev/null; then
   echo "experimental-features = nix-command flakes" >> "$HOME/.config/nix/nix.conf"
   echo ">>> ~/.config/nix/nix.conf に flakes 有効化を追記"
 fi
+{{- else if eq .chezmoi.os "linux" }}
+
+if ! command -v nix >/dev/null 2>&1; then
+  cat <<'EOF' >&2
+>>> Nix がインストールされていません。
+>>> 研究サーバの multi-user Nix セットアップは root 作業が必要です。
+>>> nix/README.md の「研究サーバ セットアップ」を参照してください。
+EOF
+  exit 1
+fi
+echo ">>> Nix 導入済み: $(nix --version)"
+# Linux サーバは /etc/nix/nix.conf (root 管理) で flakes / allowed-users / trusted-users を設定するため
+# ユーザ側の ~/.config/nix/nix.conf は触らない
 {{- end }}
