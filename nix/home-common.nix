@@ -47,5 +47,37 @@
     enable = true;
     userName = "tomoya0318";
     userEmail = "tmox13e@gmail.com";
+    extraConfig = {
+      url."git@github.com:".insteadOf = "https://github.com/";
+    };
+    ignores = [
+      # OS generated
+      ".DS_Store"
+
+      # Editor / IDE temp
+      "*.swp"
+      "*.swo"
+      "*~"
+      ".netrwhist"
+
+      # Secrets / env
+      "*.local"
+      "*.secret"
+      "*.env"
+
+      # Python / data science
+      ".venv/"
+      "venv/"
+      "__pycache__/"
+      "*.py[cod]"
+      ".ipynb_checkpoints/"
+
+      # JS / frontend
+      "node_modules/"
+
+      # mise
+      ".mise.local.toml"
+      "mise.local.toml"
+    ];
   };
 }
