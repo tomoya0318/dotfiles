@@ -9,7 +9,7 @@ Mac と Linux 環境を Nix + Home Manager で宣言的に管理する flake。
 | `flake.nix` | エントリポイント。`homeConfigurations.research` (Linux) と `mac` を定義 |
 | `home-common.nix` | 両 OS 共通設定 (packages, programs.zsh/starship/fzf/git)。`home.homeDirectory` は `stdenv.isDarwin` で OS 分岐 |
 | `home-mac.nix` | Mac 固有設定 (brew 移行 CLI, macism, RN/Android env, OrbStack 等) |
-| `home-research.nix` | Linux/研究サーバ固有 (claude-code 等、Mac は公式インストーラ採用のため対象外) |
+| `home-research.nix` | Linux/研究サーバ固有 (現状は空。claude-code はシステム共有 profile 管理に移行、`system-shared-tools.md` 参照) |
 | `flake.lock` | 入力パッケージのバージョンを pin (nixpkgs 24.11, unstable, home-manager) |
 | `teardown-server.sh` | 研究サーバから Nix + Home Manager を段階的に撤去する shell スクリプト (multi-user 対応) |
 | `../.chezmoiscripts/` | Mac/Linux 両対応の chezmoi セットアップスクリプト (Homebrew install, Nix install/verify, home-manager switch, brew bundle) |
