@@ -20,20 +20,6 @@ if git -C "$cwd" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
     echo "🐙 $repo_name | 🌿 $branch"
 
-    # --- Worktrees (only when additional worktrees exist) ---
-    worktree_line=""
-    while IFS= read -r wt_path; do
-        [ -z "$wt_path" ] && continue
-        wt_branch=$(git -C "$wt_path" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null || git -C "$wt_path" rev-parse --short HEAD 2>/dev/null)
-        if [ -n "$worktree_line" ]; then
-            worktree_line="${worktree_line} | 🌲 $wt_branch"
-        else
-            worktree_line="🌲 $wt_branch"
-        fi
-    done < <(git -C "$cwd" worktree list --porcelain 2>/dev/null \
-        | awk '/^worktree /{print $2}' \
-        | tail -n +2)
-    [ -n "$worktree_line" ] && echo "$worktree_line"
 fi
 
 # --- Line 3: Context bar and model ---
