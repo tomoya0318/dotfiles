@@ -9,16 +9,20 @@ pnpm-lock.yaml
 node_modules/
 nix/
 lefthook.yml
-chezmoi.toml.example
+# Brewfile はソースディレクトリ内でのみ使用 (brew-bundle スクリプトが sourceDir を直接参照)
+# scripts/ も手動実行用に sourceDir に置く
+Brewfile
+Brewfile.mobile
+scripts/
 
 # --- 環境ごとの展開制御 ---
 # Mac (darwin) 以外では、Mac特有の設定ファイルを展開しない
 {{ if ne .chezmoi.os "darwin" }}
 .config/karabiner/
 raycast_scripts/
-scripts/
-Brewfile
-Brewfile.mobile
+.zshrc
+.zshenv
+.config/git/
 {{ end }}
 
 # --- Mac特有の不要ファイルを全体で除外 ---

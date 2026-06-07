@@ -1,0 +1,46 @@
+add_newline = true
+
+# プロンプトのフォーマット（2行構成）
+# 1行目にディレクトリやGit情報、2行目に入力カーソルを配置します
+format = """
+$directory\
+$git_branch\
+$git_status\
+$line_break\
+$character"""
+
+# ディレクトリ表示
+[directory]
+style = "blue bold"
+truncate_to_repo = false # Gitリポジトリ内でもパスをある程度表示する
+truncation_length = 3    # 階層が深すぎるときは3つまで表示
+
+# Gitブランチ
+[git_branch]
+symbol = "🌱 "           # 特殊なアイコンフォント不要の標準絵文字
+style = "purple bold"
+
+# Gitステータス（変更があるかどうかの表示）
+[git_status]
+style = "red bold"
+format = '([$all_status$ahead_behind]($style) )'
+
+# プロンプトキャラクター（入力待ちの記号）
+[character]
+success_symbol = "[❯](green bold)" # コマンド成功時は緑
+error_symbol = "[❯](red bold)"     # コマンド失敗時は赤
+vimcmd_symbol = "[❮](green bold)"
+
+[aws]
+disabled = true
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[python]
+# ヘビの絵文字やバージョン番号は出さず、仮想環境の名前だけを表示する
+format = '[$virtualenv]($style) '
+style = "yellow bold"

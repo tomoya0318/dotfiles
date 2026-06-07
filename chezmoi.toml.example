@@ -1,6 +1,0 @@
-# chezmoi configuration example
-# Copy this file to ~/.config/chezmoi/chezmoi.toml and fill in your personal information
-# ntfy を使わない場合はこのブロック自体を省略可 (template 側で hasKey チェックしている)
-
-[data.ntfy]
-    topic = "your-ntfy-topic"

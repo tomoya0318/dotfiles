@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # 【重要】Hookから実行されてもコマンドを解決できるようにPATHを通す
-# Mac は Homebrew を先頭に、Linux は Nix user profile のみ
-export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:/usr/local/bin:{{ end }}$HOME/.nix-profile/bin:$PATH"
+export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:/usr/local/bin:{{ else }}/home/tomoya-n/.nix-profile/bin:{{ end }}$PATH"
 
 input=$(cat)
 
@@ -21,11 +20,6 @@ case "$hook_event" in
     exit 0
     ;;
 esac
-
-# macOS デスクトップ通知 (terminal-notifier が入っていれば)
-if command -v terminal-notifier >/dev/null 2>&1; then
-  terminal-notifier -title "Claude Code" -subtitle "$project" -message "$message" -sound "Ping"
-fi
 
 # ntfy通知（スマホ） chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる
 NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"

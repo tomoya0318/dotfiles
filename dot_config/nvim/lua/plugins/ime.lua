@@ -6,8 +6,7 @@ return {
     enabled = function() return vim.fn.has("mac") == 1 end,
     config = function()
       require("im_select").setup({
-        -- CLI は Nix (pkgs-unstable.macism) 経由でインストール
-        default_command = "macism",
+        default_command = "im-select",
         set_default_events = { "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" },
         set_previous_events = { "InsertEnter" },
         async_switch_im = true,

@@ -1,0 +1,50 @@
+# --- Appearance & Theme ---
+
+background-opacity = 1.0
+background-blur-radius = 0
+
+# --- Keybind ---
+keybind = super+s=text:\x1bw\x0dd
+
+# --- Font ---
+font-family = "Osaka-等幅"
+font-size = 14
+font-feature = -dlig
+font-thicken = true
+font-thicken-strength = 1.5
+
+# フォントスタイルをシンプルに固定
+font-style-bold = false
+font-style-italic = false
+font-style-bold-italic = false
+
+# 文字の間隔・描画調整
+adjust-cell-width = 0
+adjust-cell-height = 2
+alpha-blending = linear
+
+# --- Window & macOS UI ---
+# 装飾の排除
+macos-titlebar-style = hidden
+macos-window-shadow = false
+
+# 余白設定
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+
+# --- Cursor ---
+cursor-style = block
+cursor-style-blink = false
+cursor-invert-fg-bg = true
+cursor-opacity = 0.8
+
+# --- Input & Mouse ---
+# NeovimでのOptionキー操作を有効化（必須級）
+macos-option-as-alt = true
+mouse-scroll-multiplier = 2
+mouse-hide-while-typing = true
+
+# --- Interaction ---
+shell-integration-features = no-cursor
+resize-overlay = never

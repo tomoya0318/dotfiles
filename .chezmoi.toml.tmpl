@@ -1,0 +1,6 @@
+{{- $ntfyTopic := promptStringOnce . "ntfy.topic" "ntfy topic (スマホ通知用、不要なら空Enter)" -}}
+
+{{- if $ntfyTopic }}
+[data.ntfy]
+    topic = {{ $ntfyTopic | quote }}
+{{- end }}

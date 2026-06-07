@@ -1,10 +1,10 @@
-# RN / iOS / Android 開発環境
+# RN / iOS / Android 開発環境 (chezmoi source 内で管理。~/ には展開しない)
 # 使うとき:
-#   brew bundle --file=~/Brewfile.mobile
-#   ~/scripts/setup-mobile.sh         # Android SDK コンポーネントなど
+#   brew bundle --file=~/.local/share/chezmoi/Brewfile.mobile
+#   ~/.local/share/chezmoi/scripts/setup-mobile.sh   # Android SDK コンポーネントなど
 #
 # 使い終わって片付けたいとき:
-#   brew bundle cleanup --file=~/Brewfile.mobile --force
+#   brew bundle cleanup --file=~/.local/share/chezmoi/Brewfile.mobile --force
 
 # --- iOS (CocoaPods) ---
 brew "cocoapods"

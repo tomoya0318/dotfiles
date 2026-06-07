@@ -1,0 +1,1 @@
+# .zshenv は chezmoi (Mac) で管理。起動時に必要な設定は .zshrc に記載。

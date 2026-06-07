@@ -1,0 +1,80 @@
+# --- Homebrew ---
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# --- PATH ---
+export PATH="$HOME/.local/bin:$HOME/Library/pnpm:$PATH"
+
+# --- 環境変数 ---
+export EDITOR="zed --wait"
+export VISUAL="zed --wait"
+export PNPM_HOME="$HOME/Library/pnpm"
+export OBSIDIAN_VAULT="$HOME/Documents/Obsidian Vault"
+
+# --- 履歴 ---
+HISTSIZE="1000000"
+SAVEHIST="1000000"
+HISTFILE="$HOME/.zsh_history"
+setopt HIST_FCNTL_LOCK
+unsetopt APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+unsetopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+unsetopt HIST_EXPIRE_DUPS_FIRST
+setopt SHARE_HISTORY
+unsetopt EXTENDED_HISTORY
+
+# --- 補完 ---
+autoload -U compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+
+# --- zsh プラグイン (brew install zsh-autosuggestions zsh-syntax-highlighting) ---
+BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+if [ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  ZSH_AUTOSUGGEST_STRATEGY=(history)
+fi
+if [ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
+# --- ツール起動 ---
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+if command -v fzf >/dev/null 2>&1; then
+  eval "$(fzf --zsh)"
+fi
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook zsh)"
+fi
+
+# --- OrbStack ---
+[ -f ~/.orbstack/shell/init.zsh ] && source ~/.orbstack/shell/init.zsh
+
+# --- Android/RN (オプション) ---
+if [ -d /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home ]; then
+  export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+fi
+if [ -d "$HOME/Library/Android/sdk" ]; then
+  export ANDROID_HOME="$HOME/Library/Android/sdk"
+  export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
+fi
+
+# --- エイリアス ---
+alias dev='cd ~/dev'
+
+# --- Obsidian ---
+# `obsidian cd` で vault へ移動、それ以外は公式 CLI (v1.12.4+) に委譲
+obsidian() {
+  if [ "$1" = "cd" ]; then
+    cd "$OBSIDIAN_VAULT"
+  else
+    command obsidian "$@"
+  fi
+}

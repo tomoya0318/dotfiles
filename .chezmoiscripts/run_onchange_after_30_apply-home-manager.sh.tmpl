@@ -1,28 +1,16 @@
 #!/bin/bash
-# flake.nix / home-common.nix / home-{mac,research}.nix の内容が変わったら再実行:
-# flake:      {{ include "nix/flake.nix" | sha256sum }}
-# common:     {{ include "nix/home-common.nix" | sha256sum }}
-{{- if eq .chezmoi.os "darwin" }}
-# mac:        {{ include "nix/home-mac.nix" | sha256sum }}
-{{- else if eq .chezmoi.os "linux" }}
-# research:   {{ include "nix/home-research.nix" | sha256sum }}
-{{- end }}
+# 研究サーバ (Linux) のみ: home-manager switch を実行する
+# home-research.nix の内容が変わったら再実行:
+# research: {{ include "nix/home-research.nix" | sha256sum }}
+{{- if eq .chezmoi.os "linux" }}
 set -euo pipefail
 
 if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 
-{{- if eq .chezmoi.os "darwin" }}
-TARGET=mac
-{{- else if eq .chezmoi.os "linux" }}
-TARGET=research
-{{- else }}
-echo ">>> 未対応 OS、home-manager をスキップ"
-exit 0
-{{- end }}
-
-echo ">>> home-manager switch を適用 (flake: {{ .chezmoi.sourceDir }}/nix#${TARGET})"
+echo ">>> home-manager switch を適用 (flake: {{ .chezmoi.sourceDir }}/nix#research)"
 nix run home-manager/release-24.11 -- switch \
-  --flake "{{ .chezmoi.sourceDir }}/nix#${TARGET}" \
+  --flake "{{ .chezmoi.sourceDir }}/nix#research" \
   -b bak
+{{- end }}

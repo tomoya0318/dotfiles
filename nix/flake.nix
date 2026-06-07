@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-    # 頻繁に更新されるパッケージ (例: neovim) を unstable から追従する
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
@@ -14,15 +13,11 @@
   # 使い方:
   #   cd nix/
   #   研究サーバ: nix run home-manager/release-24.11 -- switch --flake .#research
-  #   Mac:        nix run home-manager/release-24.11 -- switch --flake .#mac
   #
   # ファイル構成:
-  #   home-common.nix   両 OS 共通の設定 (packages, programs, home.homeDirectory は OS 分岐)
-  #   home-mac.nix      Mac 固有 (brew formula 移行分、RN/Android env、OrbStack 等)
-  #   home-research.nix Linux/研究サーバ固有 (現状は空。claude-code はシステム共有 profile で管理)
+  #   home-research.nix  Linux/研究サーバの全設定
   outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
-      # unfree ライセンスのパッケージを明示的に許可する (現状は空)
       allowedUnfree = [];
       mkUnstablePkgs = system: import nixpkgs-unstable {
         inherit system;
@@ -38,16 +33,7 @@
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = mkExtraArgs "x86_64-linux";
           modules = [
-            ./home-common.nix
             ./home-research.nix
-          ];
-        };
-        "mac" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-          extraSpecialArgs = mkExtraArgs "aarch64-darwin";
-          modules = [
-            ./home-common.nix
-            ./home-mac.nix
           ];
         };
       };

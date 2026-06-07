@@ -4,10 +4,11 @@
 {{- if eq .chezmoi.os "darwin" }}
 set -euo pipefail
 
-if command -v brew >/dev/null 2>&1 && [ -f "$HOME/Brewfile" ]; then
-  echo ">>> brew bundle を実行 (Cask をセットアップ)"
-  brew bundle --file="$HOME/Brewfile"
+BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
+if command -v brew >/dev/null 2>&1 && [ -f "$BREWFILE" ]; then
+  echo ">>> brew bundle を実行 (CLI ツール・Cask をセットアップ)"
+  brew bundle --file="$BREWFILE"
 else
-  echo ">>> brew or ~/Brewfile が未準備、スキップ"
+  echo ">>> brew or Brewfile が未準備、スキップ"
 fi
 {{- end }}

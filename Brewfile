@@ -1,25 +1,48 @@
-# 常用 Brewfile
-# 適用: brew bundle --file=~/Brewfile
-# 同期(未宣言を削除): brew bundle --file=~/Brewfile cleanup --force
-#
-# CLI は全て Nix (home-mac.nix) で管理中。
-# このファイルには GUI アプリ (Cask) のみ。
-# Phase 2b で nix-darwin 導入後に homebrew 宣言に統合予定。
+# 常用 Brewfile (chezmoi source 内で管理。~/ には展開しない)
+# chezmoi apply で自動適用される (.chezmoiscripts/run_onchange_after_40_brew-bundle.sh)
+# 手動適用: brew bundle --file=~/.local/share/chezmoi/Brewfile
+# 同期(未宣言を削除): brew bundle --file=~/.local/share/chezmoi/Brewfile cleanup --force
+
+# --- CLI ツール ---
+brew "git"
+brew "chezmoi"
+brew "neovim"
+brew "fzf"
+brew "ripgrep"
+brew "fd"
+brew "jq"
+brew "tree"
+brew "gh"
+brew "lefthook"
+brew "mise"
+brew "direnv"
+brew "starship"
+brew "awscli"
+brew "cmake"
+brew "coreutils"
+brew "ffmpeg"
+brew "uv"
+brew "wireguard-tools"
+
+# --- zsh プラグイン ---
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
+# --- IME 切替 (nvim の im-select.nvim が使用) ---
+tap "daipeihust/tap"
+brew "daipeihust/tap/im-select"
 
 # --- Cask: ターミナル ---
-cask "ghostty"
-cask "warp"
+cask "cmux"
+
+# --- Cask: ノート/ドキュメント ---
+cask "obsidian"
 
 # --- Cask: 仮想化/コンテナ ---
 cask "orbstack"
 
 # --- Cask: Mac 拡張 ---
 cask "karabiner-elements"
-
-# --- Cask: 開発ツール ---
-# codeql は将来 project-scope の Nix に移行予定
-cask "codeql"
-cask "ngrok"
 
 # --- Cask: 文書/組版 ---
 cask "mactex"
