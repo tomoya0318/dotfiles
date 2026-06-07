@@ -1,18 +1,22 @@
 # nix/
 
-Mac と Linux 環境を Nix + Home Manager で宣言的に管理する flake。
+研究サーバ (Linux/CentOS) 環境を Nix + Home Manager で宣言的に管理する flake。
+
+> **Mac は Nix を使わない。** ローカル Mac の CLI/GUI は Homebrew (`Brewfile`) と
+> mise (`~/.config/mise/config.toml`) で管理する。Nix はカーネル/glibc が古い
+> 研究サーバでモダンなツールチェインを入れるためだけに使う。Mac とサーバを
+> 完全に揃える利点が薄かったため、ローカルは素直に brew/mise に寄せた。
 
 ## ファイル構成
 
 | ファイル | 役割 |
 |---|---|
-| `flake.nix` | エントリポイント。`homeConfigurations.research` (Linux) と `mac` を定義 |
-| `home-common.nix` | 両 OS 共通設定 (packages, programs.zsh/starship/fzf/git)。`home.homeDirectory` は `stdenv.isDarwin` で OS 分岐 |
-| `home-mac.nix` | Mac 固有設定 (brew 移行 CLI, macism, RN/Android env, OrbStack 等) |
-| `home-research.nix` | Linux/研究サーバ固有 (現状は空。claude-code はシステム共有 profile 管理に移行、`system-shared-tools.md` 参照) |
+| `flake.nix` | エントリポイント。`homeConfigurations.research` (Linux) のみ定義 |
+| `home-research.nix` | 研究サーバの全設定 (packages, programs.zsh/starship/fzf/git)。claude-code はシステム共有 profile 管理 (`system-shared-tools.md`) のため除外 |
 | `flake.lock` | 入力パッケージのバージョンを pin (nixpkgs 24.11, unstable, home-manager) |
+| `system-shared-tools.md` | claude-code 等をシステム共有 profile で管理する手順 |
 | `teardown-server.sh` | 研究サーバから Nix + Home Manager を段階的に撤去する shell スクリプト (multi-user 対応) |
-| `../.chezmoiscripts/` | Mac/Linux 両対応の chezmoi セットアップスクリプト (Homebrew install, Nix install/verify, home-manager switch, brew bundle) |
+| `../.chezmoiscripts/` | セットアップスクリプト (Mac: Homebrew install + brew bundle / Linux: Nix 検証 + home-manager switch) |
 
 ---
 
@@ -28,70 +32,61 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tomoya0318
 
 1. chezmoi バイナリ取得
 2. dotfiles repo を `~/.local/share/chezmoi` に clone
-3. `.chezmoiscripts/run_once_before_10_install-brew.sh` — Homebrew 未導入なら install
-4. `.chezmoiscripts/run_once_before_20_install-nix.sh` — Nix (Determinate Installer) install + flakes 有効化
-5. chezmoi apply で dotfiles を deploy (nvim LazyVim 設定, `~/.claude/`, `~/Brewfile`, 等)
-6. `.chezmoiscripts/run_onchange_after_30_apply-home-manager.sh` — `home-manager switch --flake .#mac` で zsh/starship/git/各種 CLI を Nix 管理下に
-7. `.chezmoiscripts/run_onchange_after_40_brew-bundle.sh` — `brew bundle` で Cask GUI アプリ (ghostty, orbstack, warp, karabiner, codeql, ngrok, mactex) を install
+3. `.chezmoi.toml.tmpl` — ntfy topic (スマホ通知用) を対話入力 (不要なら空 Enter)
+4. `.chezmoiscripts/run_once_before_10_install-brew.sh` — Homebrew 未導入なら install
+5. chezmoi apply で dotfiles を deploy (`.zshrc`/`.zshenv`、git/nvim/ghostty/starship/zed/mise 設定、`~/.claude/` 等)
+6. `.chezmoiscripts/run_onchange_after_40_brew-bundle.sh` — `brew bundle` で CLI ツール (git, neovim, mise, ripgrep, …) と Cask (cmux, obsidian, orbstack, karabiner, mactex 等) を install
 
-完了後、**新しい Terminal を開けば** Nix 経由の CLI が利用可能。
+> `run_once_before_20_install-nix` と `run_onchange_after_30_apply-home-manager`
+> は Linux 専用 (テンプレートで darwin 時は no-op)。Mac では何もしない。
+
+完了後、**新しい Terminal を開けば** brew/mise 経由の CLI が利用可能。
 
 ### bootstrap 後のオプション
 
-**Claude Code セットアップ** (Mac は公式インストーラ採用):
+**mise でランタイム install** (node/pnpm 等、`~/.config/mise/config.toml` に宣言):
 
 ```bash
-# Anthropic 公式インストーラで ~/.local/bin/claude に install
-curl -fsSL https://claude.ai/install.sh | bash
-
-# サブスクログイン
-claude login
+mise install
 ```
 
-> Mac で Nix 経由 (`pkgs-unstable.claude-code`) を使わない理由:
-> 公式版が常に最新 (unstable lock より早い)、cmux.app 等の他ツールとの統合
-> もスムーズなため。研究サーバ (Linux) のほうは Nix 管理 (`home-research.nix`)。
+**Claude Code セットアップ** (Anthropic 公式インストーラ):
 
-**RN / iOS / Android 開発する場合**:
 ```bash
-brew bundle --file=~/Brewfile.mobile
-~/scripts/setup-mobile.sh
+curl -fsSL https://claude.ai/install.sh | bash   # ~/.local/bin/claude に install
+claude login                                      # サブスクログイン
+```
+
+**RN / iOS / Android 開発する場合** (Brewfile は ~/ に展開しないので source を直接指定):
+
+```bash
+brew bundle --file=~/.local/share/chezmoi/Brewfile.mobile
+~/.local/share/chezmoi/scripts/setup-mobile.sh
 ```
 
 ### 既存 Mac での継続運用
 
-flake (`home-mac.nix`, `flake.lock` 等) や Brewfile を編集した後:
+`Brewfile` や各種設定を編集した後:
 
 ```bash
 cd ~/.local/share/chezmoi
 chezmoi update   # git pull + apply + run_onchange を自動再実行
 ```
 
-内部で `home-manager switch` や `brew bundle` が再発火する (`.chezmoiscripts/run_onchange_*` の include hash が変化するため)。
+`Brewfile` の内容が変わると `.chezmoiscripts/run_onchange_after_40_brew-bundle.sh`
+の include hash が変化して `brew bundle` が再発火する。
 
-### `claude-code` の更新
-
-unstable 追従のため `flake.lock` を明示的に bump する:
+未宣言のパッケージを掃除したいとき:
 
 ```bash
-cd ~/.local/share/chezmoi/nix
-nix flake update nixpkgs-unstable
-cd ..
-chezmoi apply   # home-manager switch で新版 claude-code が入る
+brew bundle --file=~/.local/share/chezmoi/Brewfile cleanup --force
 ```
 
 ### Mac 側 teardown (手動)
 
-Mac 側に一括 teardown スクリプトは未用意 (需要が出たら追加)。手動では:
-
 ```bash
-# Nix 撤去 (Determinate Installer が uninstall コマンドを提供)
-/nix/nix-installer uninstall
-
-# chezmoi が展開した dotfiles 削除
-chezmoi purge
-
-# brew/Cask は手動で必要なものだけ
+chezmoi purge    # chezmoi が展開した dotfiles を削除
+# brew で入れたものは手動で必要に応じて: brew uninstall <formula/cask>
 ```
 
 ---
@@ -210,12 +205,14 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tomoya0318
 4. chezmoi apply で `~/.config/nvim`, `~/.claude` 等の dotfiles を deploy
 5. `.chezmoiscripts/run_onchange_after_30_apply-home-manager.sh` — `home-manager switch --flake .#research` で zsh/starship/git/各種 CLI を Nix 管理下に
 
-`.zshrc` / `.gitconfig` は `.chezmoiignore` の Linux 向け除外で展開されない (home-manager が生成)。
-Mac 用の `Brewfile`・`raycast_scripts/` 等も同様に除外。
+`.zshrc` / `.zshenv` / `.config/git/` は `.chezmoiignore` の Linux 向け除外で展開されない
+(home-manager が `home-research.nix` の `programs.zsh`/`git` から生成する)。
+Mac 用の `.config/karabiner/`・`raycast_scripts/` も同様に除外。
+`Brewfile`・`scripts/` は全 OS で展開対象外 (source 内でのみ使用)。
 
-### 6. (Ghostty 利用時) terminfo をサーバに転送
+### 6. (cmux/Ghostty 利用時) terminfo をサーバに転送
 
-Mac の Ghostty は `TERM=xterm-ghostty` を送出する。RHEL 系には `xterm-ghostty` の terminfo が無いため、zsh の行入力が崩れる (文字化け・Delete 効かない等)。
+Mac の cmux (libghostty ベース) / Ghostty は `TERM=xterm-ghostty` を送出する。RHEL 系には `xterm-ghostty` の terminfo が無いため、zsh の行入力が崩れる (文字化け・Delete 効かない等)。
 
 **Mac 側**で実行:
 
