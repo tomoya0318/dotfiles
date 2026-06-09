@@ -10,7 +10,6 @@ export PATH="$HOME/.local/bin:$HOME/Library/pnpm:$PATH"
 export EDITOR="zed --wait"
 export VISUAL="zed --wait"
 export PNPM_HOME="$HOME/Library/pnpm"
-export OBSIDIAN_VAULT="$HOME/Documents/Obsidian Vault"
 
 # --- 履歴 ---
 HISTSIZE="1000000"
@@ -68,13 +67,3 @@ fi
 
 # --- エイリアス ---
 alias dev='cd ~/dev'
-
-# --- Obsidian ---
-# `obsidian cd` で vault へ移動、それ以外は公式 CLI (v1.12.4+) に委譲
-obsidian() {
-  if [ "$1" = "cd" ]; then
-    cd "$OBSIDIAN_VAULT"
-  else
-    command obsidian "$@"
-  fi
-}
