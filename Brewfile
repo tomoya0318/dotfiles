@@ -23,6 +23,8 @@ brew "coreutils"
 brew "ffmpeg"
 brew "uv"
 brew "wireguard-tools"
+brew "defuddle"
+brew "poppler"
 
 # --- zsh プラグイン ---
 brew "zsh-autosuggestions"
