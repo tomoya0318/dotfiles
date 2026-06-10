@@ -1,4 +1,8 @@
 # --- Appearance & Theme ---
+# Zed と揃えた Tokyo Night (Night バリアント, 背景 #1a1b26)
+theme = TokyoNight
+# Zed 同様に文字は白寄りに上書き (デフォルト #c0caf5 は少し暗いため)
+foreground = #ffffff
 
 background-opacity = 1.0
 background-blur-radius = 0
