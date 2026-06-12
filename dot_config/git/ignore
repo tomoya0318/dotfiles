@@ -1,0 +1,21 @@
+# グローバル gitignore (~/.config/git/ignore)
+# OS・エディタが生成する成果物をリポジトリ横断で無視する
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# エディタ / IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# 環境
+.direnv/
+.env.local
