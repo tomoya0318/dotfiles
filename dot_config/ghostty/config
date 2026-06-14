@@ -11,11 +11,11 @@ background-blur-radius = 0
 keybind = super+s=text:\x1bw\x0dd
 
 # --- Font ---
-font-family = "Osaka-等幅"
+font-family = "UDEV Gothic 35NF"
 font-size = 14
 font-feature = -dlig
 font-thicken = true
-font-thicken-strength = 1.5
+font-thicken-strength = 128
 
 # フォントスタイルをシンプルに固定
 font-style-bold = false
@@ -23,13 +23,14 @@ font-style-italic = false
 font-style-bold-italic = false
 
 # 文字の間隔・描画調整
-adjust-cell-width = 0
-adjust-cell-height = 2
+adjust-cell-width = 0%
+adjust-cell-height = 10%
 alpha-blending = linear
 
 # --- Window & macOS UI ---
 # 装飾の排除
-macos-titlebar-style = hidden
+# tabs: tab をタイトルバーに統合し独立した tab バー行を無くす（最もコンパクト）
+macos-titlebar-style = tabs
 macos-window-shadow = false
 
 # 余白設定
