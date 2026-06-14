@@ -25,6 +25,8 @@ brew "uv"
 brew "wireguard-tools"
 brew "defuddle"
 brew "poppler"
+brew "terminal-notifier"
+brew "tmux"
 
 # --- zsh プラグイン ---
 brew "zsh-autosuggestions"
@@ -35,7 +37,7 @@ tap "daipeihust/tap"
 brew "daipeihust/tap/im-select"
 
 # --- Cask: ターミナル ---
-cask "cmux"
+cask "ghostty"
 
 # --- Cask: ノート/ドキュメント ---
 cask "obsidian"
@@ -48,3 +50,6 @@ cask "karabiner-elements"
 
 # --- Cask: 文書/組版 ---
 cask "mactex"
+
+# --- Cask: フォント ---
+cask "font-udev-gothic-nf"

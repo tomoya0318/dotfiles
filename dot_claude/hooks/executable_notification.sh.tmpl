@@ -21,6 +21,11 @@ case "$hook_event" in
     ;;
 esac
 
+# macOS デスクトップ通知 (terminal-notifier が入っていれば)
+if command -v terminal-notifier >/dev/null 2>&1; then
+  terminal-notifier -title "Claude Code" -subtitle "$project" -message "$message" -sound "Ping"
+fi
+
 # ntfy通知（スマホ） chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる
 NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"
 if [ -n "$NTFY_TOPIC" ]; then
