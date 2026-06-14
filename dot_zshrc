@@ -67,3 +67,10 @@ fi
 
 # --- エイリアス ---
 alias dev='cd ~/dev'
+
+# --- Ghostty シェル統合（サブシェルでも cwd を報告させる） ---
+_ghostty_zsh_integration="$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+if [[ -n "$GHOSTTY_RESOURCES_DIR" && -r "$_ghostty_zsh_integration" ]]; then
+  source "$_ghostty_zsh_integration"
+fi
+unset _ghostty_zsh_integration

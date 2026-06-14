@@ -7,6 +7,15 @@ foreground = #ffffff
 background-opacity = 1.0
 background-blur-radius = 0
 
+# --- Working Directory ---
+# 継承しない場合の基準パス（初回起動・新規タブ/ウィンドウ）
+working-directory = ~/dev
+# split (cmd+d) は現在の cwd を引き継ぐ
+split-inherit-working-directory = true
+# 新規タブ (cmd+T)・新規ウィンドウ (cmd+N) は working-directory(~/dev) で開く
+tab-inherit-working-directory = false
+window-inherit-working-directory = false
+
 # --- Keybind ---
 keybind = super+s=text:\x1bw\x0dd
 
