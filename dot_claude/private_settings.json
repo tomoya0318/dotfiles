@@ -113,7 +113,7 @@
   },
   "language": "日本語",
   "alwaysThinkingEnabled": true,
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "theme": "dark",
   "remoteControlAtStartup": false,
   "agentPushNotifEnabled": true,
