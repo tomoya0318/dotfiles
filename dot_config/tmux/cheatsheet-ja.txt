@@ -1,0 +1,46 @@
+  tmux チートシート        prefix = Ctrl-a
+  ════════════════════════════════════════
+
+  ■ ペイン（分割画面）
+    Ctrl-a |         横に分割
+    Ctrl-a -         上下に分割
+    Ctrl-a h/j/k/l   移動（左/下/上/右）
+    Ctrl-a H/J/K/L   リサイズ（連打可）
+    Ctrl-a z         ズーム（全画面トグル）
+    Ctrl-a o         次のペインへ
+    Ctrl-a Space     レイアウト切替（並びを変える）
+    Ctrl-a q         番号表示 → 数字でジャンプ
+    Ctrl-a x         ペインを閉じる
+
+  ■ ウィンドウ（タブ相当）
+    Ctrl-a c         新規ウィンドウ
+    Ctrl-a 1 2 3 …   番号で移動
+    Ctrl-a n / p     次 / 前
+    Ctrl-a w         一覧から選ぶ
+    Ctrl-a ,         名前を変更
+    Ctrl-a &         閉じる
+
+  ■ セッション（プロジェクト）
+    Ctrl-a f         プロジェクト切替（fzf で選ぶ・無ければ作成）
+    Ctrl-a s         起動中の session 一覧・切替
+    Ctrl-a ( / )     前 / 次の session
+    Ctrl-a $         名前を変更
+    Ctrl-a d         detach（切り離す・session は生き残る）
+      復帰:          シェルで  tmux attach
+      終了(kill):    Ctrl-a s で選び x  /  tmux kill-session -t 名前
+
+  ■ コピー（スクロール / 選択）
+    Ctrl-a [         copy-mode に入る（q で抜ける）
+                       h/j/k/l 移動 ・ Ctrl-u/Ctrl-d 半ページ
+                       / 検索 → n/N 次/前 ・ v 選択 ・ y コピー
+    Ctrl-a ]         ペースト
+
+  ■ その他
+    Ctrl-a r         設定リロード
+    Ctrl-a ?         このヘルプ
+    Ctrl-a :         コマンド入力（任意の tmux コマンド）
+    Ctrl-a Ctrl-a    行頭へ移動を送る（shell 本来の Ctrl-a）
+    全コマンド:      man tmux
+
+  ──────────────────────────────────────────
+  このヘルプを閉じる:  q

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ~/dev 配下のプロジェクトを fzf で選び、tmux session に切替（無ければ作成）。
+# 引数でパスを渡せばそれを使い、無ければ fzf で対話選択する。
+
+if [ $# -eq 1 ]; then
+  selected="$1"
+else
+  selected=$(find ~/dev -mindepth 1 -maxdepth 1 -type d | sort | \
+    fzf --prompt='project> ' --preview 'ls -1 {}' --preview-window=right,40%)
+fi
+
+# 何も選ばなければ終了
+[ -z "$selected" ] && exit 0
+
+# tmux の session 名に使えない . : を _ に置換
+name=$(basename "$selected" | tr '.:' '__')
+
+# session が無ければ、その cwd で作成
+tmux has-session -t="$name" 2>/dev/null || tmux new-session -ds "$name" -c "$selected"
+
+# tmux の中なら切替、外なら attach
+if [ -n "$TMUX" ]; then
+  tmux switch-client -t "$name"
+else
+  tmux attach -t "$name"
+fi
