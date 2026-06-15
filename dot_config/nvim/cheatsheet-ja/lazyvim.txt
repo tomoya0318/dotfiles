@@ -1,0 +1,18 @@
+▌ LazyVim（Space = leader） ━━━━━━━━━━━━━━━━━━━━━━
+
+  ■ ファイル・検索
+    Space e         ファイルツリー
+    Space Space     ファイル検索（fuzzy）
+    Space /         中身を grep
+    Space s k       キーマップを検索
+
+  ■ git
+    Space g g       LazyGit を開く
+    Space g d       差分レビューを開く（Diffview）
+    Space g x       差分レビューを閉じる
+
+  ■ 困ったら
+    Space           押して待つ → which-key が候補表示
+    Space ? v/f/l/a チートシート（vim / ファイル / LazyVim / 全部）
+    :Tutor          対話チュートリアル（標準キー学習）
+    :help xxx       マニュアル
