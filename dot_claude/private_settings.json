@@ -115,7 +115,7 @@
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
   "theme": "dark",
-  "remoteControlAtStartup": false,
+  "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
 }
