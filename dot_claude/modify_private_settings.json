@@ -1,4 +1,7 @@
-{
+{{- /* chezmoi:modify-template */ -}}
+{{- /* effortLevel は chezmoi 管理外: 既存ファイルの値があればそれを尊重し、無ければ下記のフォールバックを使う。
+       これにより /effort でセッション中に変更しても chezmoi diff が出ない。 */ -}}
+{{- $settings := (`{
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
@@ -113,9 +116,18 @@
   },
   "language": "日本語",
   "alwaysThinkingEnabled": true,
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "theme": "dark",
-  "remoteControlAtStartup": true,
+  "remoteControlAtStartup": false,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
-}
+}` | fromJson) -}}
+{{- if hasKey .chezmoi "stdin" -}}
+{{-   if .chezmoi.stdin -}}
+{{-     $existing := (.chezmoi.stdin | fromJson) -}}
+{{-     if hasKey $existing "effortLevel" -}}
+{{-       $_ := set $settings "effortLevel" (get $existing "effortLevel") -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{ $settings | toPrettyJson }}
