@@ -1,0 +1,21 @@
+▌ lazygit（git TUI）  ※ Space g g で起動 / q で終了 ━━
+
+  ■ 基本のコミットの流れ
+    2          Files パネルへ（変更ファイル一覧）
+    Space      カーソル上のファイルを ステージ / 解除
+    a          全部 ステージ / 解除
+    c          コミット → メッセージ入力 → Enter で確定
+    P / p      push / pull
+
+  ■ パネル / カーソル移動
+    1〜5       Status / Files / Branches / Commits / Stash へ
+    j / k      上下移動
+    Enter      開く（差分を見る等）   Esc 戻る   q 終了
+
+  ■ ファイル操作（Files パネル）
+    Enter      差分を開き、ハンク/行を部分ステージ（Space で選択）
+    d          変更を破棄（戻せない・注意）
+    C          エディタでメッセージ（複数行・確定は Ctrl+S 推奨）
+
+  ■ 困ったら
+    ?          lazygit 内の全キー一覧（今のパネルで使えるもの）

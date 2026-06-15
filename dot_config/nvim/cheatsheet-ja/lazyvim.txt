@@ -13,6 +13,6 @@
 
   ■ 困ったら
     Space           押して待つ → which-key が候補表示
-    Space ? v/f/l/a チートシート（vim / ファイル / LazyVim / 全部）
+    Space ? v/f/l/g/a チートシート（vim/ファイル/LazyVim/lazygit/全部）
     :Tutor          対話チュートリアル（標準キー学習）
     :help xxx       マニュアル
