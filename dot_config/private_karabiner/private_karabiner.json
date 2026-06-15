@@ -4,33 +4,28 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Change caps_lock key to command+control+option+shift. (Post escape key when pressed alone)",
+                        "description": "Caps Lock を単体で押したときは Escape、押し続けたときは Control として扱う。",
                         "manipulators": [
                             {
                                 "from": {
                                     "key_code": "caps_lock",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
-                                    }
-                                ],
+                                "to": [{ "key_code": "left_control" }],
                                 "to_if_alone": [{ "key_code": "escape" }],
                                 "type": "basic"
                             }
                         ]
                     },
                     {
-                        "description": "コマンドキーを単体で押したときに、英数・かなキーを送信する。（左コマンドキーは英数、右コマンドキーはかな） (rev 3)",
+                        "description": "コマンドキーを単体で押したときは英数・かなを送信し、長押し時のみ修飾キーとして扱う。（左=英数/⌘、右=かな/Hyper） (rev 4)",
                         "manipulators": [
                             {
                                 "from": {
                                     "key_code": "left_command",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 100 },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 150 },
                                 "to": [
                                     {
                                         "key_code": "left_command",
@@ -46,15 +41,21 @@
                                     "key_code": "right_command",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 100 },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 150 },
                                 "to": [
                                     {
-                                        "key_code": "right_command",
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"],
                                         "lazy": true
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "japanese_kana" }],
-                                "to_if_held_down": [{ "key_code": "right_command" }],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
                                 "type": "basic"
                             }
                         ]
