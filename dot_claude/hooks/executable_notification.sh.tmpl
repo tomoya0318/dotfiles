@@ -21,16 +21,20 @@ case "$hook_event" in
     ;;
 esac
 
-# macOS デスクトップ通知 (terminal-notifier が入っていれば)
-if command -v terminal-notifier >/dev/null 2>&1; then
-  terminal-notifier -title "Claude Code" -subtitle "$project" -message "$message" -sound "Ping"
+# --- デスクトップ通知 (2026-06) ---
+# Ghostty への移行に伴い terminal-notifier を廃止。
+# OSC(777/9/99) 経由のネイティブ通知は当環境の Ghostty ではバナー化されず、
+# notify-on-command-finish は claude が単一の長時間コマンド扱いのため
+# タスク単位で発火しない。よって OS 標準コマンドで直接バナーを出す方式に統一。
+# - Mac:   osascript（標準搭載・brew 依存ゼロ・フォーカス非依存で毎回発火）
+# - Linux: notify-send（あれば）
+# スマホ通知は settings.json の agentPushNotifEnabled=true（Claude 公式アプリ）に委譲。
+{{ if eq .chezmoi.os "darwin" -}}
+osascript -e "display notification \"$message\" with title \"Claude Code\" subtitle \"$project\""
+# 通知音は afplay で別途再生（-v で音量を上げられる。sound name 経由だと音量固定のため）
+afplay -v 2 /System/Library/Sounds/Funk.aiff &
+{{- else -}}
+if command -v notify-send >/dev/null 2>&1; then
+  notify-send "Claude Code - $project" "$message"
 fi
-
-# ntfy通知（スマホ） chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる
-NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"
-if [ -n "$NTFY_TOPIC" ]; then
-  curl -s \
-    -H "Title: Claude Code - $project" \
-    -d "$message" \
-    "https://ntfy.sh/$NTFY_TOPIC" > /dev/null 2>&1 &
-fi
+{{- end }}
