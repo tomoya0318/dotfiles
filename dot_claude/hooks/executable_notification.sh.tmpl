@@ -31,20 +31,10 @@ esac
 {{ if eq .chezmoi.os "darwin" -}}
 osascript -e "display notification \"$message\" with title \"Claude Code\" subtitle \"$project\""
 # 通知音は afplay で別途再生（-v で音量を上げられる。sound name 経由だと音量固定のため）
-afplay -v 2 /System/Library/Sounds/Funk.aiff &
+# fd を切り離さないと Claude Code がフック完了を再生終了まで待ってしまうため /dev/null へ
+afplay -v 2 /System/Library/Sounds/Funk.aiff >/dev/null 2>&1 </dev/null &
 {{- else -}}
 if command -v notify-send >/dev/null 2>&1; then
   notify-send "Claude Code - $project" "$message"
 fi
 {{- end }}
-
-# --- スマホ通知 (ntfy) ---
-# chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる。
-# Claude 公式アプリの agentPushNotifEnabled とは別系統で、外出先でも届く。
-NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"
-if [ -n "$NTFY_TOPIC" ]; then
-  curl -s \
-    -H "Title: Claude Code - $project" \
-    -d "$message" \
-    "https://ntfy.sh/$NTFY_TOPIC" > /dev/null 2>&1 &
-fi
