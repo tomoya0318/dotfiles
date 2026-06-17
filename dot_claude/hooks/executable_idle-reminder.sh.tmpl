@@ -30,17 +30,24 @@ case "$hook_event" in
     cancel_timer
     (
       sleep "$idle_seconds"
-      # 自分が最新のタイマーで、かつまだキャンセルされていなければ通知
-      if [ -f "$lock" ] && [ "$(cat "$lock")" = "$BASHPID" ]; then
+      # まだキャンセルされていなければ通知。Stop ごとに前タイマーを kill+rm
+      # するため、lock が残っていれば自分が最新のタイマーとみなせる。
+      # （macOS の /bin/bash 3.2 では $BASHPID が空なので PID 照合は使わない）
+      if [ -f "$lock" ]; then
         rm -f "$lock"
+        # Claude のペインを今表示しているなら鳴らさない。別ウィンドウ/ペインへ
+        # 移動・別セッションへ切替・デタッチ時は下記が 0 になり通知する。
+        seen=$(tmux display-message -p -t "$TMUX_PANE" '#{&&:#{window_active},#{&&:#{pane_active},#{session_attached}}}' 2>/dev/null)
+        if [ "$seen" = "0" ]; then
 {{ if eq .chezmoi.os "darwin" -}}
-        osascript -e "display notification \"未確認のタスクがあります\" with title \"Claude Code\" subtitle \"$project\""
-        afplay -v 2 /System/Library/Sounds/Funk.aiff
+          osascript -e "display notification \"未確認のタスクがあります\" with title \"Claude Code\" subtitle \"$project\""
+          afplay -v 2 /System/Library/Sounds/Funk.aiff
 {{- else -}}
-        if command -v notify-send >/dev/null 2>&1; then
-          notify-send "Claude Code - $project" "未確認のタスクがあります"
-        fi
+          if command -v notify-send >/dev/null 2>&1; then
+            notify-send "Claude Code - $project" "未確認のタスクがあります"
+          fi
 {{- end }}
+        fi
       fi
     ) >/dev/null 2>&1 </dev/null &
     echo "$!" > "$lock"
