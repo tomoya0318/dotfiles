@@ -38,8 +38,8 @@ alpha-blending = linear
 
 # --- Window & macOS UI ---
 # 装飾の排除
-# tabs: tab をタイトルバーに統合し独立した tab バー行を無くす（最もコンパクト）
-macos-titlebar-style = tabs
+# hidden: タイトルバーを非表示にする（ネイティブのウィンドウボーダー・丸角は保持）
+macos-titlebar-style = hidden
 macos-window-shadow = false
 
 # 余白設定
