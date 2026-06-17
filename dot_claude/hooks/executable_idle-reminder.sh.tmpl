@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# 【重要】Hookから実行されてもコマンドを解決できるようにPATHを通す
+export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:/usr/local/bin:{{ else }}/home/tomoya-n/.nix-profile/bin:{{ end }}$PATH"
+
+# tmux 内のときだけ有効（席を外しやすい運用を想定）
+[ -z "$TMUX" ] && exit 0
+
+input=$(cat)
+hook_event=$(echo "$input" | jq -r '.hook_event_name')
+session_id=$(echo "$input" | jq -r '.session_id')
+cwd=$(echo "$input" | jq -r '.cwd')
+project=$(basename "$cwd")
+
+# 停止後、この秒数アイドルが続いたら再通知する
+idle_seconds=30
+lock="/tmp/claude-idle-reminder-${session_id}.lock"
+
+# 既存のリマインダータイマーを止める
+cancel_timer() {
+  if [ -f "$lock" ]; then
+    kill "$(cat "$lock")" 2>/dev/null
+    rm -f "$lock"
+  fi
+}
+
+case "$hook_event" in
+  "Stop")
+    # 前のターンのタイマーが残っていれば破棄してから張り直す
+    cancel_timer
+    (
+      sleep "$idle_seconds"
+      # 自分が最新のタイマーで、かつまだキャンセルされていなければ通知
+      if [ -f "$lock" ] && [ "$(cat "$lock")" = "$BASHPID" ]; then
+        rm -f "$lock"
+{{ if eq .chezmoi.os "darwin" -}}
+        osascript -e "display notification \"未確認のタスクがあります\" with title \"Claude Code\" subtitle \"$project\""
+        afplay -v 2 /System/Library/Sounds/Funk.aiff
+{{- else -}}
+        if command -v notify-send >/dev/null 2>&1; then
+          notify-send "Claude Code - $project" "未確認のタスクがあります"
+        fi
+{{- end }}
+      fi
+    ) >/dev/null 2>&1 </dev/null &
+    echo "$!" > "$lock"
+    ;;
+  "UserPromptSubmit")
+    # ユーザーが操作を再開したのでリマインダーは不要
+    cancel_timer
+    ;;
+esac
+
+exit 0

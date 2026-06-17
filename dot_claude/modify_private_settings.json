@@ -98,6 +98,21 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/notification.sh"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/idle-reminder.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/idle-reminder.sh"
           }
         ]
       }
