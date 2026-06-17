@@ -1,6 +1,9 @@
 return {
   "stevearc/oil.nvim",
   opts = {
+    -- 外部（Claude Code など別プロセス）でのファイル追加・削除を監視し、
+    -- oil バッファを自動で更新する（手動 <C-l> リフレッシュ不要にする）
+    watch_for_changes = true,
     keymaps = {
       -- "gy" を押すと、現在地のパスをクリップボードにコピーする
       ["gy"] = {
