@@ -38,3 +38,15 @@ if command -v notify-send >/dev/null 2>&1; then
   notify-send "Claude Code - $project" "$message"
 fi
 {{- end }}
+
+# --- スマホ通知 (ntfy) ---
+# OS 分岐の外で実行するため、Mac 作業時もデスクトップ通知と併せてスマホへ届く。
+# chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる。
+# Claude 公式アプリの agentPushNotifEnabled とは別系統で、外出先でも届く。
+NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"
+if [ -n "$NTFY_TOPIC" ]; then
+  curl -s \
+    -H "Title: Claude Code - $project" \
+    -d "$message" \
+    "https://ntfy.sh/$NTFY_TOPIC" > /dev/null 2>&1 &
+fi
