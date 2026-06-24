@@ -14,6 +14,8 @@ lefthook.yml
 Brewfile
 Brewfile.mobile
 scripts/
+# docs/ はリポジトリ内部の手順書。ホームには展開しない
+docs/
 
 # --- 環境ごとの展開制御 ---
 # Mac (darwin) 以外では、Mac特有の設定ファイルを展開しない

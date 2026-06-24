@@ -90,4 +90,31 @@
       "text": "#c0caf5",
     },
   },
+  // LaTeX 拡張（texlab 言語サーバを同梱）を自動導入。
+  // 入らない場合は拡張パネルで "LaTeX" を検索して手動インストール。
+  "auto_install_extensions": {
+    "latex": true,
+  },
+  // LaTeX: 保存で latexmk ビルド → Skim へ SyncTeX 前方検索（PDFを該当箇所へ）。
+  // ビルドの tool 定義（uplatex/dvipdfmx/biber 等）は ~/.latexmkrc に集約し
+  // nvim(vimtex) / CLI と共有する。Skim 側は自動リロード有効化済み。
+  "lsp": {
+    "texlab": {
+      "settings": {
+        "texlab": {
+          "build": {
+            "executable": "latexmk",
+            // -pdfdvi = DVI 経由（uplatex→dvipdfmx）。実エンジンは ~/.latexmkrc が決める。
+            "args": ["-pdfdvi", "-synctex=1", "-interaction=nonstopmode", "%f"],
+            "onSave": true,
+            "forwardSearchAfter": true,
+          },
+          "forwardSearch": {
+            "executable": "/Applications/Skim.app/Contents/SharedSupport/displayline",
+            "args": ["%l", "%p", "%f"],
+          },
+        },
+      },
+    },
+  },
 }
