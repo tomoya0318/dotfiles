@@ -7,9 +7,8 @@ return {
   -- 既定で描画 ON。normal モードで描画され、insert モードに入ると生テキストに
   -- 戻る（markview のデフォルト hybrid 挙動）ので、編集時は素のまま扱える。
   -- leader を覚えずとも i / <Esc> で素⇔描画が自然に切り替わる。
-  -- 高速スクロール時の描画崩れは、マウスホイールスクロールを無効化して
-  -- j/k・<C-d>/<C-u> 等の離散移動に統一して回避している
-  -- （config/options.lua の mousescroll = "ver:0,hor:0"）。
+  -- 高速スクロール時の描画崩れは離散移動（j/k・<C-d>/<C-u>）で回避できる。
+  -- tmux 内ではホイールを矢印キーに変換して同経路へ寄せている（tmux.conf 参照）。
   -- normal のまま完全に素で見たいときは <leader>um で描画トグル（保険）。
   -- 画像や巨大な表を別ウィンドウで見る用途は md-render（render-markdown）に
   -- 分担する想定（ただし <leader>mp キーは未実装。md-render.lua の TODO 参照）。
