@@ -11,6 +11,26 @@
     Space g d       差分レビューを開く（Diffview）
     Space g x       差分レビューを閉じる
 
+  ■ Markdown
+    Space u m       インライン描画 ON/OFF（markview・既定ON）
+    Space c p       ブラウザでプレビュー（markdown-preview）
+    g d             リンク先へジャンプ（marksman LSP）
+    :Markview HybridToggle  編集中も描画を残す/戻す
+    （広い表は smart-tables がセル折返しで窓幅に自動フィット）
+
+  ■ LaTeX（\ = localleader・tex ファイルで / 保存→自動ビルド→Skim 更新）
+    \ l l           継続コンパイル ON/OFF（保存のたび自動ビルド）★まずこれ
+    \ l v           PDF を Skim で該当箇所に表示（前方ジャンプ）
+    \ l k           コンパイル停止
+    \ l c           中間ファイルを掃除（aux/log/dvi 等）
+    \ l e           エラー一覧（quickfix）
+    \ l t           目次（TOC）をトグル
+    （.pdf を直接開くと自動で Skim に渡る。ビルド定義は ~/.latexmkrc を共有）
+
+  ■ 文章校正（textlint・tex/markdown で自動）
+    （保存/挿入抜けで自動チェック → ] d / [ d で指摘へ移動）
+    :TextlintFix     自動修正（。→．・，・である調 等／プロジェクト設定準拠）
+
   ■ 困ったら
     Space           押して待つ → which-key が候補表示
     Space ? v/f/l/g/a チートシート（vim/ファイル/LazyVim/lazygit/全部）
