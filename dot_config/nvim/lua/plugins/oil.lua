@@ -1,3 +1,5 @@
+local fv = require("config.file_visibility")
+
 return {
   "stevearc/oil.nvim",
   opts = {
@@ -10,33 +12,8 @@ return {
       show_hidden = true,
       -- VSCode の files.exclude / Zed の file_scan_exclusions 相当:
       -- ここに挙げたものは常に非表示（g. でも出さない）
-      is_always_hidden = function(name, _)
-        local always_hidden = {
-          -- 汎用
-          [".git"] = true,
-          [".DS_Store"] = true,
-          -- JS / TS / フロントエンド
-          ["node_modules"] = true,
-          [".next"] = true, -- Next.js のビルドキャッシュ
-          [".nuxt"] = true, -- Nuxt のビルドキャッシュ
-          [".turbo"] = true, -- Turborepo のキャッシュ
-          -- Python
-          [".venv"] = true, -- 仮想環境
-          ["venv"] = true,
-          ["__pycache__"] = true, -- バイトコードキャッシュ
-          [".mypy_cache"] = true,
-          [".pytest_cache"] = true,
-          [".ruff_cache"] = true,
-        }
-        if always_hidden[name] then
-          return true
-        end
-        -- 末尾一致で隠すもの（*.pyc, *.egg-info など名前が可変なもの）
-        if name:match("%.pyc$") or name:match("%.egg%-info$") then
-          return true
-        end
-        return false
-      end,
+      -- 一覧の実体は config/file_visibility.lua（snacks picker と共有の単一ソース）
+      is_always_hidden = fv.oil_is_always_hidden,
     },
     keymaps = {
       -- "gy" を押すと、現在地のパスをクリップボードにコピーする
