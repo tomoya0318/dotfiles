@@ -1,11 +1,35 @@
 #!/usr/bin/env bash
-# ~/dev 配下のプロジェクトを fzf で選び、tmux session に切替（無ければ作成）。
+# よく使う作業ルートを起点に、配下の git リポジトリ（とベース自身）を
+# fzf で選び、tmux session に切替（無ければ作成）。
 # 引数でパスを渡せばそれを使い、無ければ fzf で対話選択する。
+
+# --- 起点になるベースディレクトリ（ここを増やせば対象が広がる） ---
+bases=(
+  "$HOME/dev"
+  "$HOME/.local/share/chezmoi"
+)
+
+list_candidates() {
+  {
+    # 1) 各ベース自身も候補に含める（git でないルート等のため）
+    for b in "${bases[@]}"; do
+      [ -d "$b" ] && printf '%s\n' "$b"
+    done
+
+    # 2) 各ベース配下で .git を持つフォルダ＝リポジトリを深さ無制限で探す
+    #    fd は .gitignore を尊重するので node_modules 等には潜らず高速
+    for b in "${bases[@]}"; do
+      [ -d "$b" ] || continue
+      fd --hidden --type d --glob '.git' "$b" --exclude node_modules \
+        | sed 's#/\.git/*$##'
+    done
+  } | sort -u
+}
 
 if [ $# -eq 1 ]; then
   selected="$1"
 else
-  selected=$(find ~/dev -mindepth 1 -maxdepth 1 -type d | sort | \
+  selected=$(list_candidates | \
     fzf --prompt='project> ' --preview 'ls -1 {}' --preview-window=right,40%)
 fi
 
