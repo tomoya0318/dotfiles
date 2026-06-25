@@ -79,6 +79,10 @@ vim.keymap.set("n", "<leader>gw", function()
       return
     end
     vim.cmd.cd(vim.fn.fnameescape(choice.dir))
+    -- cwd を変えるだけではカレントバッファが旧 worktree を指したままになり、
+    -- LazyVim の root 検出(snacks picker)や oil が旧 worktree をスコープする。
+    -- 無名バッファにすることで root 検出が cwd(=新 worktree)にフォールバックする。
+    vim.cmd.enew()
     Snacks.notify.info("cwd → " .. choice.dir, { title = "worktree" })
   end)
 end, { desc = "Switch git worktree" })
