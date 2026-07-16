@@ -26,7 +26,7 @@ brew "uv"
 brew "wireguard-tools"
 brew "defuddle"
 brew "poppler"
-brew "tmux"
+brew "herdr" # agent multiplexer (AI agent 対応の tmux 代替、ghostty と併用)
 
 # --- zsh プラグイン ---
 brew "zsh-autosuggestions"
@@ -44,6 +44,9 @@ cask "obsidian"
 
 # --- Cask: 仮想化/コンテナ ---
 cask "orbstack"
+
+# --- Cask: パスワード管理 ---
+cask "1password-cli"
 
 # --- Cask: Mac 拡張 ---
 cask "karabiner-elements"

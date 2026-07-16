@@ -1,6 +1,19 @@
 [user]
 	name = "tomoya0318"
 	email = "tmox13e@gmail.com"
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJg2dx4+Yd4L99k4uEmnmLnYxEE+1cMlqGN1WqPyIgXZ
+
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+	program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgsign = true
 
 [url "git@github.com:"]
 	insteadOf = "https://github.com/"

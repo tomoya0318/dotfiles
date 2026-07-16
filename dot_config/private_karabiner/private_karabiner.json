@@ -45,8 +45,8 @@
                                 "to": [
                                     {
                                         "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"],
-                                        "lazy": true
+                                        "lazy": true,
+                                        "modifiers": ["left_command", "left_control", "left_option"]
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "japanese_kana" }],
@@ -62,6 +62,18 @@
                     }
                 ]
             },
+            "devices": [
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 33398,
+                        "vendor_id": 9306
+                    },
+                    "ignore": false,
+                    "ignore_vendor_events": true
+                }
+            ],
             "name": "Default profile",
             "selected": true,
             "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }

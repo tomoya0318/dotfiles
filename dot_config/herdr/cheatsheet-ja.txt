@@ -1,0 +1,46 @@
+  herdr チートシート        prefix = Ctrl-a
+  ════════════════════════════════════════
+
+  ■ ペイン（分割画面）
+    Ctrl-a v         右に分割
+    Ctrl-a -         下に分割
+    Ctrl-a h/j/k/l   移動（左/下/上/右）
+    Ctrl-a r         リサイズモード（h/j/k/l で調整、Esc で抜ける）
+    Ctrl-a z         ズーム（全画面トグル）
+    Ctrl-a Tab       次のペインへ（Shift+Tab で前へ）
+    Ctrl-a x         ペインを閉じる
+    Ctrl-a Shift-p   ペインに名前を付ける
+
+  ■ タブ（tmux のウィンドウ相当）
+    Ctrl-a c         新規タブ
+    Ctrl-a 1 2 3 …   番号で移動
+    Ctrl-a n / p     次 / 前
+    Ctrl-a Shift-t   名前を変更
+    Ctrl-a Shift-x   閉じる
+
+  ■ ワークスペース（tmux のセッション/プロジェクト相当）
+    Ctrl-a w         ピッカーで一覧・切替
+    Ctrl-a Shift-n   新規作成
+    Ctrl-a g         goto（名前で移動）
+    Ctrl-a Shift-w   名前を変更
+    Ctrl-a Shift-d   閉じる（確認あり）
+    Ctrl-a q         detach（切り離す・セッションは生き残る）
+      復帰:          シェルで  herdr
+      完全停止:      herdr server stop
+
+  ■ スクロールバック / コピー
+    マウスホイール    スクロールバックを見る・ドラッグ選択でコピー
+    Ctrl-a e         スクロールバックをエディタで開く
+
+  ■ その他
+    Ctrl-a ?         このヘルプ
+    F1               全キーバインド一覧（ビルトイン）
+    Ctrl-a s         設定画面
+    Ctrl-a Shift-r   設定リロード
+    Ctrl-a b         サイドバー表示切替
+    Ctrl-a o         通知のあったペインへジャンプ
+    Ctrl-a Ctrl-a    行頭へ移動を送る（shell 本来の Ctrl-a）
+    agent 状態:      サイドバーに working / blocked / done / idle を表示
+
+  ──────────────────────────────────────────
+  このヘルプを閉じる:  q

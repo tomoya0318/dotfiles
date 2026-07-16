@@ -1,0 +1,33 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* config.toml は ChatGPT アプリ/codex が自動書き換えするため全置換せず、
+       選んだキーだけ強制する。手書きコメントは apply 時に失われる。 */ -}}
+{{- $cfg := dict -}}
+{{- if hasKey .chezmoi "stdin" -}}
+{{-   if .chezmoi.stdin -}}
+{{-     $cfg = (.chezmoi.stdin | fromToml) -}}
+{{-   end -}}
+{{- end -}}
+{{- $_ := set $cfg "notify" (list (printf "%s/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient" .chezmoi.homeDir) "turn-ended") -}}
+{{- $_ := set $cfg "sandbox_mode" "workspace-write" -}}
+{{- $_ := set $cfg "approval_policy" "on-request" -}}
+{{- $_ := set $cfg "approvals_reviewer" "auto_review" -}}
+{{- $_ := set $cfg "service_tier" "default" -}}
+{{- if not (hasKey $cfg "model") -}}
+{{-   $_ := set $cfg "model" "gpt-5.6-terra" -}}
+{{- end -}}
+{{- if not (hasKey $cfg "model_reasoning_effort") -}}
+{{-   $_ := set $cfg "model_reasoning_effort" "medium" -}}
+{{- end -}}
+{{- $features := dict -}}
+{{- if hasKey $cfg "features" -}}
+{{-   $features = get $cfg "features" -}}
+{{- end -}}
+{{- $_ := set $features "js_repl" false -}}
+{{- $_ := set $features "hooks" true -}}
+{{- $_ := set $cfg "features" $features -}}
+{{- if hasKey $cfg "tui" -}}
+{{-   $tui := get $cfg "tui" -}}
+{{-   $_ := unset $tui "notifications" -}}
+{{-   $_ := unset $tui "notification_condition" -}}
+{{- end -}}
+{{ $cfg | toToml }}

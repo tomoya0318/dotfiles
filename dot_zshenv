@@ -1,1 +1,10 @@
-# .zshenv は chezmoi (Mac) で管理。起動時に必要な設定は .zshrc に記載。
+# .zshenv は chezmoi (Mac) で管理。基本設定は .zshrc に記載し、
+# 全シェル（非対話含む）に効かせたいものだけここに置く。
+
+# --- ロケール ---
+# ghostty(libghostty) が macOS のロケールを BCP47 形式のまま LC_ALL に注入し、
+# POSIX の setlocale が解釈できず C にフォールバックする（起動時 setlocale 警告の原因）。
+# LC_ALL は最優先なので unset し、正しい LANG に解決させる。
+# claude の bash スナップショット等の子シェルにも継承させるため .zshrc でなくここに置く。
+export LANG=en_US.UTF-8
+unset LC_ALL

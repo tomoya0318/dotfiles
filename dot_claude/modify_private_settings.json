@@ -84,6 +84,18 @@
     "defaultMode": "auto"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/herdr-agent-state.sh session",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "permission_prompt",
@@ -102,21 +114,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/notification.sh"
-          },
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/idle-reminder.sh"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/idle-reminder.sh"
           }
         ]
       }

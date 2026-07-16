@@ -1,0 +1,42 @@
+# herdr 設定 (chezmoi 管理: dot_config/herdr/config.toml)
+# デフォルト一覧: herdr --default-config / 反映: herdr server reload-config
+
+[terminal]
+# 新規ペイン/タブ/ワークスペースは元ペインの cwd を継承（tmux の pane_current_path 相当）
+new_cwd = "follow"
+
+[keys]
+# tmux 時代の prefix (Ctrl-a) を踏襲
+prefix = "ctrl+a"
+
+# ビルトインのキーバインド一覧は F1 へ退避（prefix+? は日本語チートシートに使う）
+help = "f1"
+
+# vim 風ペイン移動（デフォルト値だが明示しておく）
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# send-prefix はビルトイン: prefix を2回押す（Ctrl-a Ctrl-a）と literal な
+# Ctrl-a が中のアプリへ送られる（シェルの行頭移動）。設定不要。
+
+# --- 日本語チートシート（tmux の prefix+? を踏襲、一時ペインで表示） ---
+[[keys.command]]
+key = "prefix+?"
+type = "pane"
+command = "less --mouse ~/.config/herdr/cheatsheet-ja.txt"
+description = "日本語チートシートを表示"
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[ui]
+agent_panel_sort = "spaces"
+show_agent_labels_on_pane_borders = false
+
+# 背景ワークスペースの agent 状態変化を macOS 通知センターへ出す
+# （アクティブタブは herdr の仕様で抑制される。フォーカス中の通知は hook 側で対応予定）
+[ui.toast]
+delivery = "system"
