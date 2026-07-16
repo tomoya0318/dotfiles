@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# 【重要】Hookから実行されてもコマンドを解決できるようにPATHを通す
 export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:/usr/local/bin:{{ else }}/home/tomoya-n/.nix-profile/bin:{{ end }}$PATH"
 
 input=$(cat)
@@ -21,28 +20,8 @@ case "$hook_event" in
     ;;
 esac
 
-# --- デスクトップ通知 (2026-06) ---
-# Ghostty への移行に伴い terminal-notifier を廃止。
-# OSC(777/9/99) 経由のネイティブ通知は当環境の Ghostty ではバナー化されず、
-# notify-on-command-finish は claude が単一の長時間コマンド扱いのため
-# タスク単位で発火しない。よって OS 標準コマンドで直接バナーを出す方式に統一。
-# - Mac:   osascript（標準搭載・brew 依存ゼロ・フォーカス非依存で毎回発火）
-# - Linux: notify-send（あれば）
-{{ if eq .chezmoi.os "darwin" -}}
-osascript -e "display notification \"$message\" with title \"Claude Code\" subtitle \"$project\""
-# 通知音は afplay で別途再生（-v で音量を上げられる。sound name 経由だと音量固定のため）
-# fd を切り離さないと Claude Code がフック完了を再生終了まで待ってしまうため /dev/null へ
-afplay -v 2 /System/Library/Sounds/Funk.aiff >/dev/null 2>&1 </dev/null &
-{{- else -}}
-if command -v notify-send >/dev/null 2>&1; then
-  notify-send "Claude Code - $project" "$message"
-fi
-{{- end }}
-
 # --- スマホ通知 (ntfy) ---
-# OS 分岐の外で実行するため、Mac 作業時もデスクトップ通知と併せてスマホへ届く。
-# chezmoi.toml に [data.ntfy] が無ければ空になりスキップされる。
-# Claude 公式アプリの agentPushNotifEnabled とは別系統で、外出先でも届く。
+# デスクトップ通知は cmux が OSC 経由で処理するためフックからは送らない。
 NTFY_TOPIC="{{- if hasKey . "ntfy" }}{{ .ntfy.topic }}{{ end }}"
 if [ -n "$NTFY_TOPIC" ]; then
   curl -s \
