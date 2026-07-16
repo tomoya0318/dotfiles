@@ -2,6 +2,21 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+-- gy / gY : 現在のバッファのパスをクリップボードにコピーする
+-- LazyVim の gy → type_definition は plugins/lsp.lua で無効化済み
+-- oil バッファでは oil 側の gy/gY（バッファローカル）が優先されるため衝突しない
+vim.keymap.set("n", "gy", function()
+  local path = vim.fn.expand("%:p")
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path)
+end, { desc = "Copy absolute path" })
+
+vim.keymap.set("n", "gY", function()
+  local path = vim.fn.expand("%:.")
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path)
+end, { desc = "Copy relative path" })
+
 -- lazygit を Space g g で開く（snacks 経由。LazyVim 既定では extra 扱いのため明示）
 -- worktree 運用対応:
 --   - oil バッファは擬似パス(oil://)になるので、表示中の実ディレクトリを基点にする
