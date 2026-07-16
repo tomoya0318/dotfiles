@@ -67,18 +67,3 @@ fi
 
 # --- エイリアス ---
 alias dev='cd ~/dev'
-
-# --- Ghostty シェル統合（サブシェルでも cwd を報告させる） ---
-_ghostty_zsh_integration="$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
-if [[ -n "$GHOSTTY_RESOURCES_DIR" && -r "$_ghostty_zsh_integration" ]]; then
-  source "$_ghostty_zsh_integration"
-fi
-unset _ghostty_zsh_integration
-
-# --- tmux 自動アタッチ ---
-# ghostty 起動時、tmux の外にいれば直近セッションへアタッチ。
-# セッションが1つも無ければ現在の cwd で新規作成する。
-# （ghostty 限定なので zed 等の統合ターミナルでは発動しない）
-if [[ -z "$TMUX" && -n "$GHOSTTY_RESOURCES_DIR" ]]; then
-  tmux attach || tmux new
-fi
