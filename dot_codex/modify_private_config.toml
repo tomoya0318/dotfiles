@@ -15,9 +15,9 @@
 {{- if not (hasKey $cfg "model") -}}
 {{-   $_ := set $cfg "model" "gpt-5.6-terra" -}}
 {{- end -}}
-{{- if not (hasKey $cfg "model_reasoning_effort") -}}
-{{-   $_ := set $cfg "model_reasoning_effort" "medium" -}}
-{{- end -}}
+{{- $_ := set $cfg "personality" "pragmatic" -}}
+{{- $_ := set $cfg "model_verbosity" "low" -}}
+{{- $_ := set $cfg "model_reasoning_summary" "concise" -}}
 {{- $features := dict -}}
 {{- if hasKey $cfg "features" -}}
 {{-   $features = get $cfg "features" -}}
