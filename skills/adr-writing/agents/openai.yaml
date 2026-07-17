@@ -1,0 +1,4 @@
+interface:
+  display_name: "ADR Writing"
+  short_description: "日本語のADRを作成、改訂、レビューし、判断履歴を管理する"
+  default_prompt: "$adr-writing を使って、このプロジェクトの日本語 ADR を作成またはレビューしてください。"

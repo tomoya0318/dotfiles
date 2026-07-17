@@ -14,6 +14,8 @@ lefthook.yml
 Brewfile
 Brewfile.mobile
 scripts/
+# agent skills はリポジトリ直下を正本とし、apply後に各エージェントへ同期する
+skills/
 # docs/ はリポジトリ内部の手順書。ホームには展開しない
 docs/
 

@@ -3,7 +3,6 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "openai>=1.66",
-#     "python-dotenv>=1.0",
 # ]
 # ///
 """
@@ -12,13 +11,13 @@ Sakana Fugu client (OpenAI-compatible Responses API).
 uv の PEP723 インラインメタデータで依存を隔離環境に自動解決して実行する。
 グローバル python を汚さない。
 
-API キーは ~/dev/.env の SAKANA_API_KEY から読む（環境変数があればそちらを優先）。
+API キーは 1Password の Secret Reference から `op read` で取得する。
 
 使い方:
     # プロンプトは stdin / 位置引数 / --prompt-file のいずれか
-    echo "TLS の仕組みを簡潔に説明して" | uv run ~/.claude/skills/sakana-fugu/fugu.py
-    uv run ~/.claude/skills/sakana-fugu/fugu.py --model fugu-ultra "難しい設計問題..."
-    uv run ~/.claude/skills/sakana-fugu/fugu.py --prompt-file /path/to/prompt.txt --web-search
+    echo "TLS の仕組みを簡潔に説明して" | uv run ~/.agents/skills/sakana-fugu/fugu.py
+    uv run ~/.agents/skills/sakana-fugu/fugu.py --model fugu-ultra "難しい設計問題..."
+    uv run ~/.agents/skills/sakana-fugu/fugu.py --prompt-file /path/to/prompt.txt --web-search
 
 出力:
     stdout: response.output_text のみ（クリーン。パイプ/キャプチャ向け）
@@ -27,11 +26,12 @@ API キーは ~/dev/.env の SAKANA_API_KEY から読む（環境変数があれ
 
 import argparse
 import os
+import subprocess
 import sys
 import time
 
 BASE_URL = "https://api.sakana.ai/v1"
-ENV_PATH = os.path.expanduser("~/dev/.env")
+OP_SECRET_REF = "op://Private/Sakana Fugu API/password"
 VALID_MODELS = ("fugu", "fugu-ultra", "fugu-ultra-20260615")
 
 
@@ -40,21 +40,33 @@ def eprint(*args, **kwargs):
 
 
 def load_api_key() -> str:
-    # 環境変数が既にあればそれを使う。なければ ~/dev/.env を読む。
-    key = os.getenv("SAKANA_API_KEY")
-    if not key:
-        try:
-            from dotenv import load_dotenv
+    """1Password から API キーを取得する。秘密は stdout / stderr に出力しない。"""
+    try:
+        result = subprocess.run(
+            ["op", "read", OP_SECRET_REF],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except FileNotFoundError:
+        eprint("[fugu] 1Password CLI (`op`) が見つかりません。インストールしてサインインしてください。")
+        sys.exit(2)
+    except subprocess.TimeoutExpired:
+        eprint("[fugu] 1Password からの API キー取得がタイムアウトしました。")
+        sys.exit(2)
+    except subprocess.CalledProcessError:
+        eprint(
+            "[fugu] 1Password から API キーを取得できません。"
+            "サインイン状態と Secret Reference を確認してください。"
+        )
+        sys.exit(2)
 
-            load_dotenv(ENV_PATH)
-        except Exception:
-            pass
-        key = os.getenv("SAKANA_API_KEY")
+    key = result.stdout.strip()
     if not key:
         eprint(
-            f"[fugu] SAKANA_API_KEY が見つかりません。\n"
-            f"        {ENV_PATH} に `SAKANA_API_KEY=sk-...` を設定するか、\n"
-            f"        環境変数 SAKANA_API_KEY を export してください。"
+            "[fugu] 1Password から空の API キーが返されました。"
+            "対象アイテムの password フィールドを確認してください。"
         )
         sys.exit(2)
     return key
