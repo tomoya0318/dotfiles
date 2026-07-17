@@ -1,0 +1,25 @@
+#!/bin/zsh
+
+cheatsheet=${XDG_CONFIG_HOME:-$HOME/.config}/herdr/cheatsheet-ja.txt
+
+if ! command -v gum >/dev/null 2>&1; then
+  print -u2 -- "gum is required: brew install gum"
+  exit 1
+fi
+
+if [[ ! -r $cheatsheet ]]; then
+  print -u2 -- "cheatsheet not found: $cheatsheet"
+  exit 1
+fi
+
+clear
+gum format --theme dracula < "$cheatsheet" | gum pager \
+  --show-line-numbers=false \
+  --soft-wrap \
+  --foreground '#cdd6f4' \
+  --background '#1e1e2e' \
+  --match.foreground '#1e1e2e' \
+  --match.background '#89dceb' \
+  --match-highlight.foreground '#1e1e2e' \
+  --match-highlight.background '#89b4fa' \
+  --help.foreground '#7f849c'

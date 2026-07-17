@@ -1,0 +1,201 @@
+#!/bin/zsh
+
+# Herdrのprefix modeはprefix後の1キーまでを扱う。
+# この一時ペインで2キー目を読み、Neovimのleader group風に振り分ける。
+
+source_cwd=${HERDR_ACTIVE_PANE_CWD:-$PWD}
+workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-}
+
+# Catppuccin Mocha
+base='#1e1e2e'
+surface='#313244'
+text='#cdd6f4'
+subtext='#a6adc8'
+muted='#6c7086'
+blue='#89b4fa'
+sapphire='#74c7ec'
+green='#a6e3a1'
+lavender='#b4befe'
+red='#f38ba8'
+
+if ! command -v gum >/dev/null 2>&1; then
+  print -u2 -- "gum is required: brew install gum"
+  exit 1
+fi
+
+pause_on_error() {
+  gum style --foreground "$muted" "何かキーを押すと閉じます..."
+  read -rsk 1
+}
+
+show_error() {
+  local message=$1 width=$((${COLUMNS:-80} - 4))
+  (( width < 40 )) && width=40
+
+  gum style \
+    --foreground "$red" \
+    --border rounded \
+    --border-foreground "$red" \
+    --padding '1 2' \
+    --width "$width" \
+    "$message"
+  pause_on_error
+}
+
+run_herdr() {
+  local output
+
+  if output=$(herdr "$@" 2>&1); then
+    return 0
+  fi
+
+  show_error "$output"
+  return 1
+}
+
+draw_menu() {
+  local columns=${COLUMNS:-80} lines=${LINES:-24}
+  local repo_root repo_name branch repo_line content top_margin left_margin
+  local title repo key_g key_n key_o key_d
+
+  repo_root=$(git -C "$source_cwd" rev-parse --show-toplevel 2>/dev/null)
+  if [[ -n $repo_root ]]; then
+    repo_name=${repo_root:t}
+    branch=$(git -C "$source_cwd" symbolic-ref --short HEAD 2>/dev/null)
+    [[ -n $branch ]] || branch=$(git -C "$source_cwd" rev-parse --short HEAD 2>/dev/null)
+    repo_line="$repo_name  ·  ${branch:-detached}"
+  else
+    repo_line='not a Git checkout'
+  fi
+
+  title=$'\e[1;38;2;137;180;250m◆  Git & Worktree\e[0m'
+  repo=$'\e[38;2;166;173;200m'${repo_line}$'\e[0m'
+  key_g=$'\e[1;38;2;166;227;161mg\e[0m'
+  key_n=$'\e[1;38;2;137;180;250mn\e[0m'
+  key_o=$'\e[1;38;2;116;199;236mo\e[0m'
+  key_d=$'\e[1;38;2;243;139;168md\e[0m'
+
+  content=$(printf '%s\n   %s\n\n   %s   %-20s %s\n   %s   %-20s %s\n   %s   %-20s %s\n   %s   %-20s %s\n\n       %-20s %s' \
+    "$title" "$repo" \
+    "$key_g" 'LazyGit' 'repository dashboard' \
+    "$key_n" 'New worktree' 'create from this Space' \
+    "$key_o" 'Open worktree' 'browse existing checkouts' \
+    "$key_d" 'Delete worktree' 'remove current managed Space' \
+    'q / esc' 'close menu')
+
+  top_margin=$(( (lines - 13) / 2 ))
+  left_margin=$(( (columns - 66) / 2 ))
+  (( top_margin < 0 )) && top_margin=0
+  (( left_margin < 0 )) && left_margin=0
+
+  clear
+  gum style \
+    --no-strip-ansi \
+    --foreground "$text" \
+    --background "$surface" \
+    --border rounded \
+    --border-foreground "$blue" \
+    --padding '1 3' \
+    --width 66 \
+    --margin "$top_margin 0 0 $left_margin" \
+    "$content"
+}
+
+create_worktree() {
+  local branch width=$((${COLUMNS:-80} - 8))
+  (( width > 72 )) && width=72
+  (( width < 32 )) && width=32
+
+  branch=$(gum input \
+    --header '◆  New worktree' \
+    --header.foreground "$blue" \
+    --prompt 'Branch › ' \
+    --prompt.foreground "$sapphire" \
+    --cursor.foreground "$green" \
+    --placeholder '空欄ならHerdrが自動生成' \
+    --placeholder.foreground "$muted" \
+    --width "$width") || return 0
+
+  if [[ -n $branch ]]; then
+    run_herdr worktree create --cwd "$source_cwd" --branch "$branch" --focus
+  else
+    run_herdr worktree create --cwd "$source_cwd" --focus
+  fi
+}
+
+open_worktree() {
+  local response candidates selected path height
+  local -a fields
+
+  if ! response=$(herdr worktree list --cwd "$source_cwd" --json 2>&1); then
+    show_error "$response"
+    return 1
+  fi
+
+  candidates=$(print -r -- "$response" | jq -r '
+    .result.source.source_checkout_path as $current
+    | .result.worktrees[]
+    | select(.path != $current and .is_bare == false)
+    | [(.branch // "(detached)"), .path, (if .open_workspace_id then "[open]" else "" end)]
+    | @tsv
+  ')
+
+  if [[ -z $candidates ]]; then
+    show_error '開ける別のworktreeがありません。'
+    return 1
+  fi
+
+  height=$((${LINES:-24} - 6))
+  (( height > 18 )) && height=18
+  (( height < 8 )) && height=8
+
+  selected=$(print -r -- "$candidates" | gum filter \
+    --header '◆  Open worktree' \
+    --header.foreground "$blue" \
+    --placeholder 'branchまたはpathで検索' \
+    --placeholder.foreground "$muted" \
+    --prompt '› ' \
+    --prompt.foreground "$sapphire" \
+    --indicator '◆' \
+    --indicator.foreground "$green" \
+    --text.foreground "$text" \
+    --cursor-text.foreground "$base" \
+    --cursor-text.background "$blue" \
+    --match.foreground "$lavender" \
+    --height "$height" \
+    --padding '1 2') || return 0
+
+  fields=(${(ps:\t:)selected})
+  path=$fields[2]
+  run_herdr worktree open --cwd "$source_cwd" --path "$path" --focus
+}
+
+remove_worktree() {
+  if [[ -z $workspace_id ]]; then
+    show_error '現在のHerdr Space IDを取得できませんでした。'
+    return 1
+  fi
+
+  gum confirm '現在のmanaged worktreeをSpaceごと削除しますか？' \
+    --affirmative 'Delete' \
+    --negative 'Cancel' \
+    --prompt.foreground "$red" \
+    --selected.foreground "$base" \
+    --selected.background "$red" \
+    --unselected.foreground "$subtext" \
+    --unselected.background "$surface" \
+    --padding '1 2' || return 0
+
+  run_herdr worktree remove --workspace "$workspace_id"
+}
+
+draw_menu
+read -rsk 1 choice
+
+case $choice in
+  g) exec lazygit ;;
+  n) clear; create_worktree ;;
+  o) clear; open_worktree ;;
+  d) clear; remove_worktree ;;
+  q|$'\e') ;;
+esac

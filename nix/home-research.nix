@@ -7,6 +7,7 @@
     git
     lefthook
     fzf
+    gum
     ripgrep
     fd
     jq

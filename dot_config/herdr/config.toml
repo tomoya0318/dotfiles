@@ -12,34 +12,45 @@ prefix = "ctrl+a"
 # ビルトインのキーバインド一覧は F1 へ退避（prefix+? は日本語チートシートに使う）
 help = "f1"
 
-# vim 風ペイン移動（デフォルト値だが明示しておく）
-focus_pane_left = "prefix+h"
-focus_pane_down = "prefix+j"
-focus_pane_up = "prefix+k"
-focus_pane_right = "prefix+l"
+# Space 移動は prefix+w に集約し、prefix+g は Git/worktree メニューに使う
+goto = ""
+
+# worktree 操作は Git/worktree メニューに集約する
+new_worktree = ""
+
+# ペイン分割は tmux 慣習に合わせる（左右分割は | / デフォルトの prefix+v は無効化）
+split_vertical = "prefix+|"
+
+# vim 風 + 矢印キーでのペイン移動（hjkl はそのまま残す）
+focus_pane_left = ["prefix+h", "prefix+left"]
+focus_pane_down = ["prefix+j", "prefix+down"]
+focus_pane_up = ["prefix+k", "prefix+up"]
+focus_pane_right = ["prefix+l", "prefix+right"]
 
 # send-prefix はビルトイン: prefix を2回押す（Ctrl-a Ctrl-a）と literal な
 # Ctrl-a が中のアプリへ送られる（シェルの行頭移動）。設定不要。
 
-# --- 日本語チートシート（tmux の prefix+? を踏襲、一時ペインで表示） ---
+# --- 日本語チートシート（Gum pager、一時ペインで表示） ---
 [[keys.command]]
 key = "prefix+?"
 type = "pane"
-command = "less --mouse ~/.config/herdr/cheatsheet-ja.txt"
+command = "~/.local/bin/herdr-cheatsheet"
 description = "日本語チートシートを表示"
 
-# --- lazygit（prefix+G = prefix+shift+g、一時ペインで起動） ---
+# --- Git/worktree メニュー（2キー目: g/n/o/d） ---
 [[keys.command]]
-key = "prefix+shift+g"
+key = "prefix+g"
 type = "pane"
-command = "lazygit"
-description = "lazygit を開く"
+command = "~/.local/bin/herdr-git-menu"
+description = "Git/worktree メニューを開く"
 
 [theme]
 name = "catppuccin"
 auto_switch = false
 
 [ui]
+# 選択中ペイン・一時ペインを含む枠線はCatppuccin Blueで統一
+accent = "#89b4fa"
 agent_panel_sort = "spaces"
 show_agent_labels_on_pane_borders = false
 
