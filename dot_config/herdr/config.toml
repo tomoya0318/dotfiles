@@ -28,6 +28,13 @@ type = "pane"
 command = "less --mouse ~/.config/herdr/cheatsheet-ja.txt"
 description = "日本語チートシートを表示"
 
+# --- lazygit（prefix+G = prefix+shift+g、一時ペインで起動） ---
+[[keys.command]]
+key = "prefix+shift+g"
+type = "pane"
+command = "lazygit"
+description = "lazygit を開く"
+
 [theme]
 name = "catppuccin"
 auto_switch = false
