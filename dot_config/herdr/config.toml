@@ -1,3 +1,5 @@
+# herdr が初回起動時に書き込むフラグ。apply で消えないようソースにも保持
+onboarding = false
 # herdr 設定 (chezmoi 管理: dot_config/herdr/config.toml)
 # デフォルト一覧: herdr --default-config / 反映: herdr server reload-config
 
@@ -30,17 +32,17 @@ focus_pane_right = ["prefix+l", "prefix+right"]
 # send-prefix はビルトイン: prefix を2回押す（Ctrl-a Ctrl-a）と literal な
 # Ctrl-a が中のアプリへ送られる（シェルの行頭移動）。設定不要。
 
-# --- 日本語チートシート（Gum pager、一時ペインで表示） ---
+# --- 日本語チートシート（Gum pager、popup で表示） ---
 [[keys.command]]
 key = "prefix+?"
-type = "pane"
+type = "popup"
 command = "~/.local/bin/herdr-cheatsheet"
 description = "日本語チートシートを表示"
 
 # --- Git/worktree メニュー（2キー目: g/n/o/d） ---
 [[keys.command]]
 key = "prefix+g"
-type = "pane"
+type = "popup"
 command = "~/.local/bin/herdr-git-menu"
 description = "Git/worktree メニューを開く"
 
