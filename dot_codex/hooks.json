@@ -10,6 +10,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "sh ~/.codex/hooks/runcat-usage.sh",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
     ]
   }
 }

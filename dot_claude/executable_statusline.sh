@@ -11,6 +11,30 @@ eval "$(echo "$input" | jq -r '
   @sh "seven_reset=\(.rate_limits.seven_day.resets_at // "")"
 ')"
 
+# RunCat Neo custom metrics. Keep this best-effort so a metrics write failure
+# never breaks Claude Code's status line.
+runcat_out="${RUNCAT_OUT_FILE:-$HOME/.claude/runcat-usage.json}"
+runcat_dir=$(dirname "$runcat_out")
+if mkdir -p "$runcat_dir" 2>/dev/null; then
+    runcat_tmp=$(mktemp "$runcat_dir/.runcat-usage.XXXXXX" 2>/dev/null) || runcat_tmp=""
+    if [ -n "$runcat_tmp" ]; then
+        if echo "$input" | jq '{
+            title: "Claude Code",
+            symbol: "staroflife",
+            metricsBarValue: (if .rate_limits.five_hour.used_percentage != null then "\(.rate_limits.five_hour.used_percentage | round)%" elif .rate_limits.seven_day.used_percentage != null then "\(.rate_limits.seven_day.used_percentage | round)%" else null end),
+            metrics: ([
+                (if .rate_limits.five_hour.used_percentage != null then {title: "5h", formattedValue: "\(.rate_limits.five_hour.used_percentage | round)%", normalizedValue: ([.rate_limits.five_hour.used_percentage / 100, 0] | max | [., 1] | min)} else empty end),
+                (if .rate_limits.seven_day.used_percentage != null then {title: "7d", formattedValue: "\(.rate_limits.seven_day.used_percentage | round)%", normalizedValue: ([.rate_limits.seven_day.used_percentage / 100, 0] | max | [., 1] | min)} else empty end)
+            ]),
+            lastUpdatedDate: (now | strftime("%Y-%m-%dT%H:%M:%SZ"))
+        } | with_entries(select(.value != null))' >"$runcat_tmp" 2>/dev/null; then
+            mv -f "$runcat_tmp" "$runcat_out" 2>/dev/null || rm -f "$runcat_tmp"
+        else
+            rm -f "$runcat_tmp"
+        fi
+    fi
+fi
+
 # --- Line 1: Current folder path ---
 echo "📁 ${cwd/#$HOME/~}"
 
