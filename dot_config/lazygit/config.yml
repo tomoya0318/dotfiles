@@ -1,3 +1,6 @@
+# コミットなどの外部プロセス終了後は確認を挟まずlazygitへ戻る。
+promptToReturnFromSubprocess: false
+
 git:
   # 開いている間の定期 fetch を無効化（SSH 越しの 1Password 承認が 60 秒ごとに出るのを止める）。
   # 手動 fetch/pull/push はそのまま動く。

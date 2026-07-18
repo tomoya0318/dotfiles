@@ -193,7 +193,7 @@ draw_menu
 read -rsk 1 choice
 
 case $choice in
-  g) exec lazygit ;;
+  g) exec lazygit --use-config-file "$HOME/.config/lazygit/config.yml" ;;
   n) clear; create_worktree ;;
   o) clear; open_worktree ;;
   d) clear; remove_worktree ;;
