@@ -23,8 +23,8 @@ if mkdir -p "$runcat_dir" 2>/dev/null; then
             symbol: "staroflife",
             metricsBarValue: (if .rate_limits.five_hour.used_percentage != null then "\(.rate_limits.five_hour.used_percentage | round)%" elif .rate_limits.seven_day.used_percentage != null then "\(.rate_limits.seven_day.used_percentage | round)%" else null end),
             metrics: ([
-                (if .rate_limits.five_hour.used_percentage != null then {title: "5h", formattedValue: "\(.rate_limits.five_hour.used_percentage | round)%", normalizedValue: ([.rate_limits.five_hour.used_percentage / 100, 0] | max | [., 1] | min)} else empty end),
-                (if .rate_limits.seven_day.used_percentage != null then {title: "7d", formattedValue: "\(.rate_limits.seven_day.used_percentage | round)%", normalizedValue: ([.rate_limits.seven_day.used_percentage / 100, 0] | max | [., 1] | min)} else empty end)
+                (if .rate_limits.five_hour.used_percentage != null then {title: "5h", formattedValue: "\(.rate_limits.five_hour.used_percentage | round)%\(if (.rate_limits.five_hour.resets_at | type) == "number" then " ↻ \((.rate_limits.five_hour.resets_at + (9 * 60 * 60)) | strftime("%m/%d %H:%M"))" else "" end)", normalizedValue: ([.rate_limits.five_hour.used_percentage / 100, 0] | max | [., 1] | min)} else empty end),
+                (if .rate_limits.seven_day.used_percentage != null then {title: "7d", formattedValue: "\(.rate_limits.seven_day.used_percentage | round)%\(if (.rate_limits.seven_day.resets_at | type) == "number" then " ↻ \((.rate_limits.seven_day.resets_at + (9 * 60 * 60)) | strftime("%m/%d %H:%M"))" else "" end)", normalizedValue: ([.rate_limits.seven_day.used_percentage / 100, 0] | max | [., 1] | min)} else empty end)
             ]),
             lastUpdatedDate: (now | strftime("%Y-%m-%dT%H:%M:%SZ"))
         } | with_entries(select(.value != null))' >"$runcat_tmp" 2>/dev/null; then

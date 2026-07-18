@@ -24,12 +24,12 @@ tmp=$(mktemp "$out_dir/.runcat-usage.XXXXXX" 2>/dev/null) || {
 }
 
 if jq -n --argjson token "$token_count" '
-    def percent_metric($title; $value):
+    def percent_metric($title; $value; $reset):
         if ($value | type) != "number" then empty
         else (if $value < 0 then 0 elif $value > 100 then 100 else $value end) as $clamped
         | {
             title: $title,
-            formattedValue: "\($clamped | round)%",
+            formattedValue: "\($clamped | round)%\(if $reset == null then "" else " \($reset)" end)",
             normalizedValue: (($clamped / 100) * 10000 | round / 10000)
           }
         end;
@@ -39,12 +39,18 @@ if jq -n --argjson token "$token_count" '
         elif ($minutes % 60) == 0 then "\($minutes / 60)h"
         else "\($minutes)m"
         end;
+    def reset_title($resets_at):
+        if ($resets_at | type) == "number"
+        then "↻ \(($resets_at + (9 * 60 * 60)) | strftime("%m/%d %H:%M"))"
+        else null
+        end;
 
     ["primary", "secondary"]
     | map(($token.rate_limits[.] // {}) as $limit
           | window_title($limit.window_minutes) as $title
+          | reset_title($limit.resets_at) as $reset
           | if $title == null then empty
-            else percent_metric($title; $limit.used_percent)
+            else percent_metric($title; $limit.used_percent; $reset)
             end)
     | unique_by(.title) as $limits
     | {
