@@ -15,8 +15,8 @@ import { report } from './report';
 import type { Group } from './types/report';
 import type { Progress } from './types/thread';
 
-export default function App() {
-  const { comments, checks, ctx, toggleCheck } = useThread();
+export default function App({ sessionId }: { sessionId: string }) {
+  const { comments, checks, ctx, toggleCheck } = useThread(sessionId);
   const bar = useStickyHeight();
   const { openGroups, toggleGroup, jumpTo } = useOpenGroups();
 
@@ -28,7 +28,7 @@ export default function App() {
   const progress: Progress = useMemo(
     () => computeProgress(review, checks, comments), [review, checks, comments]);
 
-  const { copied, onDone } = useHandoff(progress);
+  const { copied, onDone } = useHandoff(progress, sessionId);
 
   return (
     <main>

@@ -1,13 +1,13 @@
 ---
 name: start-implementation
-description: Starts an implementation with an investigation plan, an understanding gate, adversarial plan and implementation reviews, and a recorded prompt history.
+description: Starts an implementation with an investigation plan, an understanding gate, and adversarial plan and implementation reviews.
 disable-model-invocation: true
 argument-hint: /start-implementation <description>
 ---
 
 # 実装を開始する
 
-`tmp/NNNN_<name>/` に `plan.md`、`review.md`、`prompt.md` を作り、調査、計画検証、承認、実装、実装検証を分離して進める。
+`tmp/NNNN_<name>/` に `plan.md` と `review.md` を作り、調査、計画検証、承認、実装、実装検証を分離して進める。
 
 ## 前提
 
@@ -22,7 +22,8 @@ argument-hint: /start-implementation <description>
 
 1. 作業名は英語のハイフン区切りで渡す。ユーザーが説明的な日本語・文章の名前を指定した場合は、main が先に変換する。
    `init-work-dir.sh "<作業名>" "<base-dir>"` を実行し、JSON の作業パスを読む。
-   init直後に、ユーザーの初回指示を `prompt.md` に要約・省略せずそのまま記録する。
+   `~/dev/workbench` と `node_modules` がある場合は、任意で `http://localhost:5170/api/health` を確認し、`workbench` が応答しなければ共有 dev サーバを起動してよい。
+   サーバを起動できなくても作業開始は失敗させず、`init-work-dir.sh` 自体からは起動しない。
 2. [planning-prompt.md](references/planning-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから read-only subagent に渡して調査する。
 3. 調査結果から計画テンプレートの各節を日本語で埋める。
 4. [plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから、実装者とは別の fresh な codex に渡し、指摘だけを `review.md` の「計画検証」へ記録する。
@@ -33,7 +34,7 @@ argument-hint: /start-implementation <description>
 7. 承認後、main が Claude Code なら codex plugin の codex-rescue subagent に委譲し、返った diff を検査する。
    codex plugin が利用できない環境では、fresh な subagent に委譲する。
    main が Codex なら自分で実装する。
-   実施内容を `prompt.md` に追記し、設定の DoD コマンドを変更範囲に応じて実行する。
+   設定の DoD コマンドを変更範囲に応じて実行する。
 8. [impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから、実装者とは別の fresh な codex に渡し、修正させず指摘だけを「実装検証」へ追記する。
    指摘をどう直すかはユーザーが判断し、承認された指摘だけを実装側へ修正させる。
 

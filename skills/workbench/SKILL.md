@@ -23,7 +23,7 @@ argument-hint: /workbench [<ref-or-range>]
 - `review/handoff` … レビュー完了の合図
 
 成果物はアプリのディレクトリに置かない。
-例外は vite の最適化キャッシュだけで、これは `DIFF_REVIEW_CACHE` を明示しないと `node_modules/.vite` に書かれる（手順6で毎回指定する）。
+リポジトリの一覧は `~/.local/state/workbench/roots.json` に登録され、セッションは各リポジトリのファイルシステムと git から毎回導出される。
 
 ## 手順
 
@@ -68,16 +68,24 @@ argument-hint: /workbench [<ref-or-range>]
    指摘は AI 発のコメントとして `thread.json` に入り、該当行の下に出る。
    何度流しても重複しない。
 
-6. dev サーバを起動してユーザーに URL を伝える。
+6. dev サーバの状態を確認し、セッションの URL をユーザーに伝える。
+
+   固定 URL `http://localhost:5170/api/health` を読み、JSON の `app` が `workbench` なら既存サーバを使う。
+   応答が無ければ `pnpm --dir ~/dev/workbench dev` をバックグラウンドで起動し、同じヘルスチェックが通るまで待つ。
+   2つの skill が同時に起動すると、片方は `strictPort` により失敗しうる。
+   起動に失敗した場合はヘルスチェックをやり直し、`workbench` が応答していれば成功として扱う。
+   ポートから応答があるのに `app` が `workbench` でなければ、別のアプリが5170を使っていることを人間に知らせて止まる。
+
+   サーバが応答したら、次の API で作業ディレクトリからセッション ID を引く。
 
    ```
-   DIFF_REVIEW_REPORT=<work>/review/report.json \
-   DIFF_REVIEW_THREAD=<work>/review/thread.json \
-   DIFF_REVIEW_CACHE=node_modules/.vite-<NNNN> \
-     pnpm --dir ~/dev/workbench dev --port <port>
+   curl -sS -G --data-urlencode "workDir=<work の絶対パス>" \
+     http://localhost:5170/api/resolve
    ```
 
-   ポートと `DIFF_REVIEW_CACHE` は作業ディレクトリの連番から決める（`5170 + NNNN % 20` など）。
+   応答の `id` を使い、`http://localhost:5170/s/<id>` をユーザーに伝える。
+   セッション URL はチェックアウトの絶対パスと作業ディレクトリ名に従属する。
+   `finish-worktree` で移動または改名すると ID が変わり、以前の URL は 404 になる。
 
 7. `review/handoff` が現れるまで待つ。バックグラウンドのシェルに待たせる。
 
@@ -107,12 +115,12 @@ argument-hint: /workbench [<ref-or-range>]
    **コメントに書かれていないことはしない。** 気づいた点は直さず、返答で述べる。
 
 9. `thread.json` の変更は監視で自動反映される。エージェントの返答を見るのにリロードは要らない。
-   ただし `report.json` は監視の対象外で、起動時に一度読むだけである。
-   差分が変わった場合は手順5に戻り、**ブラウザをリロードしてから**手順7で待ち直す。
+   `report.json` の変更も監視され、対象セッションのブラウザが自動でリロードする。
+   差分が変わった場合は手順5に戻り、再生成後はそのまま手順7で待ち直す。
 
-10. ユーザーが終了を宣言したらサーバを止める。
-   未判断のグループや未解決コメントが残っていても止めてよい。
-   ただし**何を残したまま進めたかを記録する**。コミットするならメッセージの trailer に入れる。
+10. ユーザーがレビュー終了を宣言しても、マシンで共有するサーバは止めない。
+    未判断のグループや未解決コメントが残っている場合は、何を残したまま進めたかを記録する。
+    コミットするならメッセージの trailer に入れる。
 
 ## 記録すること
 

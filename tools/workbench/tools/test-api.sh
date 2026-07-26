@@ -14,9 +14,14 @@ APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PORT="${1:-5199}"
 BASE="http://localhost:$PORT"
 WORK="$(mktemp -d)"
-REPORT="$WORK/report.json"
-THREAD="$WORK/thread.json"
+STATE="$WORK/state"
+REPO="$WORK/repo"
+SESSION="$REPO/tmp/0001_x"
+REVIEW="$SESSION/review"
+REPORT="$REVIEW/report.json"
+THREAD="$REVIEW/thread.json"
 SERVER_PID=""
+SESSION_ID=""
 
 pass=0
 fail=0
@@ -42,16 +47,26 @@ check() {
 }
 
 post() {
-  curl -sS -X POST -H 'content-type: application/json' -d "$1" "$BASE/api/thread"
+  curl -sS -X POST -H 'content-type: application/json' -d "$1" \
+    "$BASE/api/sessions/$SESSION_ID/thread"
 }
 
 # --- 準備 ---
 
+mkdir -p "$STATE" "$REVIEW"
+git init -q "$REPO"
+printf '["%s"]\n' "$REPO" > "$STATE/roots.json"
+cat > "$SESSION/plan.md" <<'EOF'
+# test plan
+EOF
+cat > "$SESSION/review.md" <<'EOF'
+# test review
+EOF
 cat > "$REPORT" <<EOF
 {
   "ref": "test-ref",
   "subject": "test subject",
-  "repo": "/tmp/test-repo",
+  "repo": "$REPO",
   "threadPath": "$THREAD",
   "stats": { "files": 1, "hunks": 1, "additions": 1, "deletions": 0, "coreCandidates": 1 },
   "files": [{ "id": "F0", "old": "a.txt", "new": "a.txt", "path": "a.txt", "diff": "", "hunks": ["h001"] }],
@@ -72,9 +87,8 @@ if (exec 3<>"/dev/tcp/localhost/$PORT") 2>/dev/null; then
 fi
 
 echo "起動中 (port $PORT)..."
-DIFF_REVIEW_REPORT="$REPORT" \
-DIFF_REVIEW_THREAD="$THREAD" \
-DIFF_REVIEW_CACHE="$WORK/.vite" \
+WORKBENCH_STATE_DIR="$STATE" \
+WORKBENCH_CACHE_DIR="$WORK/.vite" \
   pnpm --dir "$APP_DIR" exec vite --port "$PORT" --strictPort >"$WORK/server.log" 2>&1 &
 SERVER_PID=$!
 
@@ -85,24 +99,40 @@ for _ in $(seq 1 60); do
     cat "$WORK/server.log" >&2
     exit 1
   fi
-  curl -sf "$BASE/api/report" >/dev/null 2>&1 && break
+  [ "$(curl -sf "$BASE/api/health" 2>/dev/null | jq -r .app 2>/dev/null)" = workbench ] && break
   sleep 0.5
 done
-if ! curl -sf "$BASE/api/report" >/dev/null 2>&1; then
+if [ "$(curl -sf "$BASE/api/health" 2>/dev/null | jq -r .app 2>/dev/null)" != workbench ]; then
   echo "サーバが応答しなかった。ログ:" >&2
   cat "$WORK/server.log" >&2
   exit 1
 fi
 
+SESSIONS="$(curl -sS "$BASE/api/sessions")"
+SESSION_ID="$(printf '%s' "$SESSIONS" | jq -r '.repositories[0].branches[0].sessions[0].id')"
+
+echo
+echo "health と sessions"
+check 'GET /api/health がアプリ名を返す' 'workbench' \
+  "$(curl -sS "$BASE/api/health" | jq -r .app)"
+check 'repository → branch → session の階層を返す' 'repo 1 0001_x' \
+  "$(printf '%s' "$SESSIONS" | jq -r '"\(.repositories[0].name) \(.repositories[0].branches|length) \(.repositories[0].branches[0].sessions[0].name)"')"
+check 'session に4文書の存在を返す' 'true true true false' \
+  "$(printf '%s' "$SESSIONS" | jq -r '.repositories[0].branches[0].sessions[0].documents | "\(.plan) \(.review) \(.report) \(.thread)"')"
+check 'session に絶対 workDir を返す' "$(realpath "$SESSION")" \
+  "$(printf '%s' "$SESSIONS" | jq -r '.repositories[0].branches[0].sessions[0].workDir')"
+check 'resolve が workDir から session ID を返す' "$SESSION_ID" \
+  "$(curl -sS -G --data-urlencode "workDir=$SESSION" "$BASE/api/resolve" | jq -r .id)"
+
 echo
 echo "report"
-check 'GET /api/report が ref を返す' \
-  'test-ref' "$(curl -sS "$BASE/api/report" | jq -r .ref)"
+check 'GET report が ref を返す' 'test-ref' \
+  "$(curl -sS "$BASE/api/sessions/$SESSION_ID/report" | jq -r .ref)"
 
 echo
 echo "thread の初期状態"
 check 'thread が無いときは空スレッド' \
-  '0 0' "$(curl -sS "$BASE/api/thread" | jq -r '"\(.comments|length) \(.checks|length)"')"
+  '0 0' "$(curl -sS "$BASE/api/sessions/$SESSION_ID/thread" | jq -r '"\(.comments|length) \(.checks|length)"')"
 
 echo
 echo "add と nextId の採番"
@@ -150,28 +180,78 @@ check '未知の op は何もしない' '1' \
 
 echo
 echo "handoff"
-rm -f "$WORK/handoff"
-curl -sS -X POST "$BASE/api/handoff" >/dev/null
-check 'handoff が thread と同じディレクトリにできる' 'yes' \
-  "$([ -f "$WORK/handoff" ] && echo yes || echo no)"
+rm -f "$REVIEW/handoff"
+curl -sS -X POST "$BASE/api/sessions/$SESSION_ID/handoff" >/dev/null
+check 'handoff が review ディレクトリにできる' 'yes' \
+  "$([ -f "$REVIEW/handoff" ] && echo yes || echo no)"
 
 echo
-echo "メソッド"
-check 'PUT /api/thread は 405' '405' \
-  "$(curl -sS -o /dev/null -w '%{http_code}' -X PUT "$BASE/api/thread")"
+echo "メソッドと 404"
+check 'PUT thread は 405' '405' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' -X PUT "$BASE/api/sessions/$SESSION_ID/thread")"
+check '未知の session ID は 404' '404' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/sessions/unknown/report")"
+check '未知の /api endpoint は 404' '404' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/unknown")"
+check '未知の /api endpoint は JSON' 'application/json' \
+  "$(curl -sSI "$BASE/api/unknown" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type" { print $2 }')"
 
 echo
 echo "壊れた入力"
 cp "$THREAD" "$WORK/thread.bak"
 echo 'not json' > "$THREAD"
 check '壊れた thread.json は空スレッド扱い' '0 0' \
-  "$(curl -sS "$BASE/api/thread" | jq -r '"\(.comments|length) \(.checks|length)"')"
+  "$(curl -sS "$BASE/api/sessions/$SESSION_ID/thread" | jq -r '"\(.comments|length) \(.checks|length)"')"
 cp "$WORK/thread.bak" "$THREAD"
 
 mv "$REPORT" "$REPORT.bak"
 check 'report が無いと 404' '404' \
-  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/report")"
+  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/sessions/$SESSION_ID/report")"
 mv "$REPORT.bak" "$REPORT"
+
+echo
+echo "realpath の封じ込め"
+printf '{}\n' > "$WORK/outside.json"
+mv "$REPORT" "$REPORT.real"
+ln -s "$WORK/outside.json" "$REPORT"
+check 'workDir 外の report symlink は 403' '403' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/sessions/$SESSION_ID/report")"
+rm "$REPORT"
+mv "$REPORT.real" "$REPORT"
+
+mv "$THREAD" "$THREAD.real"
+ln -s "$WORK/outside.json" "$THREAD"
+check 'workDir 外の thread symlink は 403' '403' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/sessions/$SESSION_ID/thread")"
+rm "$THREAD"
+mv "$THREAD.real" "$THREAD"
+
+rm -f "$REVIEW/handoff"
+printf 'keep\n' > "$WORK/outside-handoff"
+ln -s "$WORK/outside-handoff" "$REVIEW/handoff"
+check 'workDir 外の handoff symlink は 403' '403' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$BASE/api/sessions/$SESSION_ID/handoff")"
+check 'workDir 外の handoff は変更されない' 'keep' "$(cat "$WORK/outside-handoff")"
+
+echo
+echo "計画段階のセッション"
+PLAN_ONLY="$REPO/tmp/0002_plan-only"
+mkdir -p "$PLAN_ONLY"
+cat > "$PLAN_ONLY/plan.md" <<'EOF'
+# plan only
+EOF
+UPDATED_SESSIONS="$(curl -sS "$BASE/api/sessions")"
+PLAN_ONLY_ID="$(printf '%s' "$UPDATED_SESSIONS" \
+  | jq -r '.repositories[0].branches[0].sessions[] | select(.name=="0002_plan-only") | .id')"
+check 'git TTL 内でも新しい session を即時に発見する' '2' \
+  "$(printf '%s' "$UPDATED_SESSIONS" | jq -r '.repositories[0].branches[0].sessions | length')"
+check 'review ディレクトリが無い report は 404' '404' \
+  "$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/api/sessions/$PLAN_ONLY_ID/report")"
+check 'review ディレクトリが無い thread は空スレッド' '0 0' \
+  "$(curl -sS "$BASE/api/sessions/$PLAN_ONLY_ID/thread" | jq -r '"\(.comments|length) \(.checks|length)"')"
+curl -sS -X POST "$BASE/api/sessions/$PLAN_ONLY_ID/handoff" >/dev/null
+check 'handoff が review ディレクトリを作る' 'yes' \
+  "$([ -f "$PLAN_ONLY/review/handoff" ] && echo yes || echo no)"
 
 echo
 echo "----------------------------------------"

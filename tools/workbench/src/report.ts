@@ -8,7 +8,7 @@ export let hunkById: Map<string, Hunk>;
 export let opById: Map<string, FileOp>;
 export let fileById: Map<string, FileEntry>;
 export let groupOfElement: Map<string, string>;
-/** サーバが無いとき用の初期値。通常は /api/thread が正。 */
+/** サーバが無いとき用の初期値。通常はセッション別の thread API が正。 */
 export let embedded: Thread;
 
 export function init(raw: Report) {

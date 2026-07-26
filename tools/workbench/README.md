@@ -1,12 +1,35 @@
 # workbench
 
-大きな差分を「1つの決定とその波及」でグループ化し、読むべき理由の順に並べて読むためのローカルツール。
+複数のリポジトリと作業ディレクトリを一覧し、大きな差分を「1つの決定とその波及」で読めるローカル作業コンソール。
 
 skill 側の手順は `skills/workbench/SKILL.md`（このリポジトリが正本）。
-`~/.claude/skills/workbench/SKILL.md` と `~/dev/workbench` は chezmoi が張る symlink なので、
-編集するときはリポジトリ側を直す。
+`~/.claude/skills/workbench/SKILL.md` と `~/dev/workbench` は chezmoi が張る symlink なので、編集するときはリポジトリ側を直す。
 
-## 使い方
+## 起動
+
+サーバはマシンで1本だけ起動し、固定ポート5170を使う。
+
+```bash
+pnpm dev
+```
+
+Vite は `strictPort` で起動するため、5170が使用中なら別ポートへ移らず失敗する。
+`GET http://localhost:5170/api/health` が `{"app":"workbench"}` を返せば、既存のサーバをそのまま使う。
+テストサーバは `WORKBENCH_STATE_DIR` で registry を、`WORKBENCH_CACHE_DIR` で Vite の依存最適化キャッシュを分離できる。
+
+## 作業一覧
+
+`~/.local/state/workbench/roots.json` は、登録したリポジトリのメイン worktree の絶対パスを配列で持つ。
+`tools/register-root.sh <repository-root>` が冪等に追記し、`start-implementation` の作業ディレクトリ作成後にも呼ばれる。
+
+ホーム `http://localhost:5170/` は registry の各リポジトリを走査し、リポジトリ、ブランチ、セッションの3階層で表示する。
+ブランチは `git worktree list --porcelain`、セッションは各 checkout の `tmp/NNNN_<name>/` から導出する。
+
+セッションは `http://localhost:5170/s/<id>` で開く。
+ID はチェックアウトの絶対パスと作業ディレクトリ名から決まるため、サーバ再起動後も同じパスなら変わらない。
+ただし `finish-worktree` でセッションを別の checkout へ移した場合やディレクトリ名を変えた場合は ID が変わり、以前の URL は 404 になる。
+
+## 差分データの生成
 
 ```bash
 # 1. hunk とファイル操作を出す
@@ -20,30 +43,19 @@ python3 tools/gen.py <repo> <ref> \
   --findings <work>/review/findings.json \
   --thread <work>/review/thread.json \
   -o <work>/review/report.json
-
-# 4. サーバを起動
-DIFF_REVIEW_REPORT=<work>/review/report.json \
-DIFF_REVIEW_THREAD=<work>/review/thread.json \
-DIFF_REVIEW_CACHE=node_modules/.vite-<n> \
-  pnpm dev --port <port>
 ```
 
-`--findings` は実装検証の指摘を取り込むときだけ渡す。省くと findings は反映されない。
+`--findings` は実装検証の指摘を取り込むときだけ渡す。
+省くと findings は反映されない。
 
-見るファイルは全て環境変数で渡すので、同じ checkout のまま何本でも並行できる。
-ポートと `DIFF_REVIEW_CACHE` だけ分ける。
-ただし `DIFF_REVIEW_CACHE` の既定値は `node_modules/.vite` でアプリ配下を指すため、
-毎回明示しないと vite の最適化キャッシュがアプリのディレクトリに書かれる。
+## データと監視
 
-## データ
-
-`thread.json` が唯一の永続物。
-ブラウザは `/api/thread` 経由で人間のターンを書き、エージェントは同じファイルに自分のターンを足す。
+ブラウザはセッション別の API を通して `review/thread.json` に人間のターンを書き、エージェントは同じファイルに自分のターンを足す。
 互いに相手の領域を触らない。
 
-外から `thread.json` が書き換えられると監視が検知し、リロードなしで画面に反映される。
-**`report.json` は監視の対象外で、起動時に一度読むだけである。**
-差分を作り直したときはブラウザをリロードする。
+開いたセッションの `thread.json` が外から変わると、そのセッションだけが再取得する。
+`report.json` が変わると、そのセッションのページが自動でリロードする。
+計画段階で `review/` や `report.json` が無いセッションもホームに並び、ページには diff がまだ無いことを表示する。
 
 ## 制約
 

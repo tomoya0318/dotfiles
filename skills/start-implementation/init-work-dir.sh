@@ -45,15 +45,18 @@ EOF
 <!-- 指摘表: # | 指摘 | 確信度 | 対応 -->
 EOF
 } > "$WORK_DIR/review.md"
-{
-  printf '# プロンプト履歴\n\n## 初回指示 (%s)\n' "$TODAY"
-  cat <<'EOF'
+printf '{"work_dir":"%s","plan_file":"%s/plan.md","review_file":"%s/review.md","sequence_number":"%s","work_name":"%s"}\n' "$WORK_DIR" "$WORK_DIR" "$WORK_DIR" "$NEXT_NUM" "$SAFE_NAME"
 
-### ユーザーからの指示
+register_workbench_root() {
+  local home_dir="${HOME:-}"
+  [ -n "$home_dir" ] || return 0
+  local register_root="$home_dir/dev/workbench/tools/register-root.sh"
+  [ -x "$register_root" ] || return 0
 
-<!-- 初回指示をそのまま記録 -->
-
-### 実施内容
-EOF
-} > "$WORK_DIR/prompt.md"
-printf '{"work_dir":"%s","plan_file":"%s/plan.md","review_file":"%s/review.md","prompt_file":"%s/prompt.md","sequence_number":"%s","work_name":"%s"}\n' "$WORK_DIR" "$WORK_DIR" "$WORK_DIR" "$WORK_DIR" "$NEXT_NUM" "$SAFE_NAME"
+  local git_common_dir=""
+  if git_common_dir="$(git -C "$BASE_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" \
+    && [ -n "$git_common_dir" ]; then
+    "$register_root" "$(dirname "$git_common_dir")" >/dev/null 2>&1 || true
+  fi
+}
+register_workbench_root >/dev/null 2>&1 || true
