@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Creates a commit whose message carries the full plan text, so the history records why the change was made and not just what changed.
+description: Commits the working tree, carrying the full plan text as the message when a plan exists, and otherwise splitting the diff into one commit per intent.
 disable-model-invocation: true
 argument-hint: /commit
 ---
@@ -9,25 +9,46 @@ argument-hint: /commit
 
 ユーザーがコミットを求めていない場合は実行しない。
 
+## まず単位を決める
+
+`git status` と `git diff` を確認し、作業ディレクトリ `tmp/NNNN_<name>/plan.md` の有無で分ける。
+
+**plan がある** … コミットは1つ。plan が単位そのものなので切り分けない。
+plan が複数ある、またはどれが対象か曖昧なときはユーザーに確認する。
+
+**plan が無い** … 差分を意図で切り分け、**意図ごとに1コミットにする**。
+plan を通していない変更は、無関係なものが溜まっていることが多い。
+1つにまとめると、あとで片方だけ revert できなくなる。
+
+切り分けの単位は **1つの決定とその波及**。
+決定（新しい関数を足す、依存を変える）と、それに伴う機械的な追随（呼び出し側の置換、import 整理）は同じコミットに入れる。
+意図を主題1行で言えないなら、そのコミットは大きすぎる。
+
+無理に分けない。全体が1つの意図なら1コミットでよい。
+
+### 切り分けの制約
+
+対話的な `git add -p` は使えないので、**ファイル単位で分ける**。
+1ファイルに2つの意図が混ざっていて分けられないときは、ユーザーに伝えてから同じコミットに入れる。
+
+依存の順に並べる。土台を先、それを使う側を後にする。
+
 ## 主題
 
-`git status` と `git diff` を確認する。
-
-**主題の形式は `git log` の直近を見て、そのリポジトリの慣習に合わせる。**
+**形式は `git log` の直近を見て、そのリポジトリの慣習に合わせる。**
 慣習が読み取れないときだけ `<type>: <日本語の主題>` とし、
 type は `feat`、`fix`、`docs`、`style`、`refactor` のいずれかにする。
 主題は簡潔にする。
 
-## 本文に plan を全文入れる
+## 本文
 
-作業ディレクトリ `tmp/NNNN_<name>/plan.md` があれば、**全文をコミット本文に入れる**。
-要約しない。節を落とさない。
-
-plan が複数ある、またはどれが対象か曖昧なときはユーザーに確認する。
-plan が無ければ、なぜその変更をしたかを数行書く。主題だけで済ませない。
+plan があれば**全文を本文に入れる**。要約しない。節を落とさない。
 
 コード側で plan と食い違う箇所があれば、コミット前にユーザーへ伝える。
 plan を後から書き換えて辻褄を合わせない。
+
+plan が無ければ、なぜその変更をしたかを数行書く。主題だけで済ませない。
+差分を読めば分かることは書かない。書くのは選んだ理由と、その選択が外れたときに何が起きるか。
 
 ## レビューの積み残し
 
@@ -46,8 +67,10 @@ Review-pending: g2, g4 / 未解決コメント 3
 本文が複数行になるので `-m` ではなく `-F` を使う。
 
 ```
-git add .
+git add <切り分けたパス>
 git commit -F <一時ファイル>
 ```
 
 一時ファイルは作業ディレクトリの下に置き、コミット後に消す。
+
+複数コミットにしたときは、最後に `git log --oneline` で並びをユーザーへ示す。
