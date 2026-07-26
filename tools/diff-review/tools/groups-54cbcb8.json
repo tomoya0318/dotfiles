@@ -1,0 +1,28 @@
+{
+ "groups": [
+  {
+   "id": "g1",
+   "title": "pruning 契約キーの工程語化と旧データ非互換化",
+   "tags": ["設計判断", "破壊的"],
+   "reason": "node_count_before/after を node_count_initial/pruned に改名した(h303, h343)。旧 JSONL を移行するより再走を選んだので、既存キャッシュは読めなくなる。",
+   "core": ["h303", "h338", "h341", "h343"],
+   "ripple": []
+  },
+  {
+   "id": "g2",
+   "title": "本番 walk 実装の参照先変更",
+   "tags": ["設計判断"],
+   "reason": "h300 で参照先を fast-subtree-set.ts 内部の walk から ast/walk.ts の walkNodes に書き換えた。実装が追随していなければテストが誤った対象を検証し続ける。",
+   "core": ["h300"],
+   "ripple": []
+  },
+  {
+   "id": "g3",
+   "title": "設定 description の整形（リネームと無関係）",
+   "tags": ["破壊的"],
+   "reason": "h335 は今回のリネームと無関係な整形が紛れ込んだもの。別コミットに分ける選択もあった。混ざったままだとリネームの一貫性チェックが効かない。",
+   "core": ["h335"],
+   "ripple": []
+  }
+ ]
+}

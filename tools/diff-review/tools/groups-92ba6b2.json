@@ -1,0 +1,36 @@
+{
+ "groups": [
+  {
+   "id": "g1",
+   "title": "パッケージのレイヤー別再配置",
+   "tags": ["設計判断", "破壊的"],
+   "reason": "技術種別でなく責務で adapters/domain/use_cases/infrastructure に分けた。h029 のように domain 内だと infrastructure.config に依存する箇所は別出しにした。",
+   "core": ["f001", "f002", "f003", "f004", "f005", "f006", "f007", "f008", "f009", "f010", "f012"],
+   "ripple": []
+  },
+  {
+   "id": "g2",
+   "title": "永続化とドメインエンティティの Repository 分離",
+   "tags": ["設計判断", "破壊的"],
+   "reason": "Project を ORM(h057) とドメインエンティティ(h037) に分け、変換は Repository(h030) に閉じた。h011 のように ProjectService を直接呼ぶ経路が残ると DB 実装を差し替えられない。",
+   "core": ["h011", "h030", "h037", "h043", "h045", "h056", "h057", "h085"],
+   "ripple": []
+  },
+  {
+   "id": "g3",
+   "title": "GitHub 検索契約の domain/adapters 分離",
+   "tags": ["設計判断", "破壊的"],
+   "reason": "build_default_search_criteria は settings 依存のため h029 で domain/ports から adapters 側へ切り出した。同じ場所だと domain が infrastructure.config に依存する。",
+   "core": ["f011", "h028", "h029", "h041", "h042", "h081", "h082"],
+   "ripple": []
+  },
+  {
+   "id": "g4",
+   "title": "ベンチマークランナー JS パスの設定注入化",
+   "tags": ["設計判断", "破壊的"],
+   "reason": "RUNNER_JS_PATH は __file__ 相対パスだったが、benchmark_runner.py の移動で位置がずれるため settings 注入(h046) に変えた。h003 の追随漏れは即 TypeError になる。",
+   "core": ["h003", "h046", "h069", "h070", "h073"],
+   "ripple": []
+  }
+ ]
+}

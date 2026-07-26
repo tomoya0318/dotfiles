@@ -1,0 +1,30 @@
+#!/bin/bash
+# chezmoiリポジトリ直下の tools/<name>/ を ~/dev/<name> から参照させる。
+# コピーではなく symlink にするのは、~/dev 側を編集しても apply で
+# 巻き戻らないようにするため。実体は常にひとつ。
+set -euo pipefail
+
+source_root="{{ .chezmoi.sourceDir }}/tools"
+dev_root="$HOME/dev"
+
+[ -d "$source_root" ] || exit 0
+mkdir -p "$dev_root"
+
+for tool_source in "$source_root"/*; do
+  [ -d "$tool_source" ] || continue
+
+  name="${tool_source##*/}"
+  target="$dev_root/$name"
+
+  if [ -L "$target" ]; then
+    if [ "$(readlink "$target")" != "$tool_source" ]; then
+      rm "$target"
+      ln -s "$tool_source" "$target"
+    fi
+  elif [ -e "$target" ]; then
+    echo "tool target already exists and is not a symlink: $target" >&2
+    exit 1
+  else
+    ln -s "$tool_source" "$target"
+  fi
+done
