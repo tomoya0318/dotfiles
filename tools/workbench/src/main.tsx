@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
-import { fetchReport, init } from './report'
+import { fetchReport } from './api/client'
+import { init } from './report'
 import './App.css'
 
 const root = createRoot(document.getElementById('root')!)

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { type Author, AUTHOR_NAME } from './thread';
+import { AUTHOR_NAME } from './lib/comment';
+import type { Author } from './types/thread';
 
 /**
  * `public/avatar-{you,claude,codex}.png` があればそれを使い、無ければ組み込みの図形を出す。

@@ -1,8 +1,8 @@
 ---
-name: diff-review
+name: workbench
 description: Reviews a large diff by grouping hunks into decisions, ordering them by why a human must read them, and threading line comments back to the agent session.
 disable-model-invocation: true
-argument-hint: /diff-review [<ref-or-range>]
+argument-hint: /workbench [<ref-or-range>]
 ---
 
 # 差分をレビューする
@@ -11,7 +11,7 @@ argument-hint: /diff-review [<ref-or-range>]
 
 ## 前提
 
-アプリ本体は `~/dev/diff-review`。
+アプリ本体は `~/dev/workbench`（chezmoi が張る symlink。正本は dotfiles リポジトリの `tools/workbench`）。
 これか `node_modules` が無ければ、ユーザーに知らせて止まる。
 `pnpm install` を勝手に走らせない。
 
@@ -22,7 +22,8 @@ argument-hint: /diff-review [<ref-or-range>]
 - `review/findings.json` … 実装検証の指摘。取り込み用の入力
 - `review/handoff` … レビュー完了の合図
 
-アプリのディレクトリには何も書かない。
+成果物はアプリのディレクトリに置かない。
+例外は vite の最適化キャッシュだけで、これは `DIFF_REVIEW_CACHE` を明示しないと `node_modules/.vite` に書かれる（手順6で毎回指定する）。
 
 ## 手順
 
@@ -31,7 +32,7 @@ argument-hint: /diff-review [<ref-or-range>]
 2. hunk とファイル操作を出す。
 
    ```
-   python3 ~/dev/diff-review/tools/gen.py <repo> <ref> -o <work>/review/report.json
+   python3 ~/dev/workbench/tools/gen.py <repo> <ref> -o <work>/review/report.json
    ```
 
    核候補が20件未満なら、この手順を中止して差分を直接読む。
@@ -57,7 +58,7 @@ argument-hint: /diff-review [<ref-or-range>]
 5. groups と findings と thread を畳み込んで再生成する。
 
    ```
-   python3 ~/dev/diff-review/tools/gen.py <repo> <ref> \
+   python3 ~/dev/workbench/tools/gen.py <repo> <ref> \
      --groups <work>/review/groups.json \
      --findings <work>/review/findings.json \
      --thread <work>/review/thread.json \
@@ -73,7 +74,7 @@ argument-hint: /diff-review [<ref-or-range>]
    DIFF_REVIEW_REPORT=<work>/review/report.json \
    DIFF_REVIEW_THREAD=<work>/review/thread.json \
    DIFF_REVIEW_CACHE=node_modules/.vite-<NNNN> \
-     pnpm --dir ~/dev/diff-review dev --port <port>
+     pnpm --dir ~/dev/workbench dev --port <port>
    ```
 
    ポートと `DIFF_REVIEW_CACHE` は作業ディレクトリの連番から決める（`5170 + NNNN % 20` など）。
@@ -105,8 +106,9 @@ argument-hint: /diff-review [<ref-or-range>]
 
    **コメントに書かれていないことはしない。** 気づいた点は直さず、返答で述べる。
 
-9. 画面は監視で自動更新される。再生成も再起動も不要。
-   差分が変わった場合だけ手順5に戻り、手順7で待ち直す。
+9. `thread.json` の変更は監視で自動反映される。エージェントの返答を見るのにリロードは要らない。
+   ただし `report.json` は監視の対象外で、起動時に一度読むだけである。
+   差分が変わった場合は手順5に戻り、**ブラウザをリロードしてから**手順7で待ち直す。
 
 10. ユーザーが終了を宣言したらサーバを止める。
    未判断のグループや未解決コメントが残っていても止めてよい。

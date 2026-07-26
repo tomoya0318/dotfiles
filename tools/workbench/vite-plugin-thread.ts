@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, watch } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
+import { apply, load, save } from './server/threadStore.js';
 
 /**
  * `.review/thread.json` を読み書きする開発サーバ側の口。
@@ -10,76 +11,12 @@ import type { Plugin, ViteDevServer } from 'vite';
  * 丸ごと置き換えにすると、片方が書いている間にもう片方の内容が消える。
  */
 
-type Turn = { by: string; body: string };
-type Comment = {
-  id: string; hunk: string; side: string; offset: number; lineText: string;
-  label?: string; turns: Turn[]; state: string; key?: string; confidence?: string;
-};
-type Thread = { comments: Comment[]; checks: string[] };
-
-const EMPTY: Thread = { comments: [], checks: [] };
-
 function threadPath(root: string) {
   return resolve(root, process.env.DIFF_REVIEW_THREAD ?? '.review/thread.json');
 }
 
 function reportPath(root: string) {
   return resolve(root, process.env.DIFF_REVIEW_REPORT ?? '.review/report.json');
-}
-
-function load(path: string): Thread {
-  if (!existsSync(path)) return { ...EMPTY };
-  try {
-    const raw = JSON.parse(readFileSync(path, 'utf8'));
-    return { comments: raw.comments ?? [], checks: raw.checks ?? [] };
-  } catch {
-    return { ...EMPTY };
-  }
-}
-
-function save(path: string, t: Thread) {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(t, null, 1) + '\n');
-}
-
-function nextId(cs: Comment[]) {
-  const n = cs.reduce((m, c) => Math.max(m, Number(String(c.id).slice(1)) || 0), 0);
-  return `c${n + 1}`;
-}
-
-function apply(t: Thread, op: string, body: Record<string, unknown>): Thread {
-  switch (op) {
-    case 'add': {
-      const c = body.comment as Comment;
-      return { ...t, comments: [...t.comments, { ...c, id: nextId(t.comments) }] };
-    }
-    case 'reply': {
-      const { id, turn } = body as { id: string; turn: Turn };
-      return {
-        ...t,
-        comments: t.comments.map(c =>
-          c.id === id ? { ...c, turns: [...c.turns, turn], state: 'open' } : c),
-      };
-    }
-    case 'remove': {
-      const { id } = body as { id: string };
-      // AI が触れたスレッドは消させない。相手の領域を削ることになる
-      const target = t.comments.find(c => c.id === id);
-      if (!target || target.turns.some(x => x.by !== 'you')) return t;
-      return { ...t, comments: t.comments.filter(c => c.id !== id) };
-    }
-    case 'resolve': {
-      const { id } = body as { id: string };
-      return {
-        ...t,
-        comments: t.comments.map(c => (c.id === id ? { ...c, state: 'resolved' } : c)),
-      };
-    }
-    case 'checks':
-      return { ...t, checks: (body.checks as string[]) ?? [] };
-    default:
-      return t;
-  }
 }
 
 function readJson(req: import('node:http').IncomingMessage): Promise<Record<string, unknown>> {
@@ -94,7 +31,7 @@ function readJson(req: import('node:http').IncomingMessage): Promise<Record<stri
 
 export function threadApi(): Plugin {
   return {
-    name: 'diff-review-thread',
+    name: 'workbench-thread',
     configureServer(server: ViteDevServer) {
       const path = threadPath(server.config.root);
       const report = reportPath(server.config.root);

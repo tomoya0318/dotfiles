@@ -5,10 +5,10 @@ DoD コマンドは変更範囲によって切り替える。
 
 ## DoD コマンド
 
-### tools/diff-review 配下を変更したとき
-- lint: `pnpm -C tools/diff-review lint`
-- typecheck: `pnpm -C tools/diff-review exec tsc -b`
-- test: なし（テストランナー未導入）
+### tools/workbench 配下を変更したとき
+- lint: `pnpm -C tools/workbench lint`
+- typecheck: `pnpm -C tools/workbench exec tsc -b`
+- test: `tools/workbench/tools/test-api.sh`（HTTP API の回帰。dev サーバを起動するので10秒ほどかかる）
 
 ### dot_* / skills 配下を変更したとき
 - 展開確認: `chezmoi diff`
@@ -19,7 +19,7 @@ DoD コマンドは変更範囲によって切り替える。
 ## worktree セットアップコマンド
 
 ```
-pnpm -C tools/diff-review install
+pnpm -C tools/workbench install
 ```
 
 ## レビュー重点領域
