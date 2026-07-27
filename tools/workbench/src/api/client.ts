@@ -1,5 +1,6 @@
 import { normalizeThread } from '../lib/comment';
 import type { Report } from '../types/report';
+import type { PlanResponse, PlanStateResponse } from '../types/plan';
 import type { Comment, Thread } from '../types/thread';
 
 export type SessionDocuments = {
@@ -16,6 +17,8 @@ export type WorkbenchSession = {
   updatedAt: string;
   documents: SessionDocuments;
 };
+
+export type SessionMeta = Pick<WorkbenchSession, 'name' | 'documents'>;
 
 export type WorkbenchBranch = {
   name: string;
@@ -41,6 +44,9 @@ export class ApiError extends Error {
 const sessionEndpoint = (sessionId: string, resource: string): string =>
   `/api/sessions/${encodeURIComponent(sessionId)}/${resource}`;
 
+const sessionRoot = (sessionId: string): string =>
+  `/api/sessions/${encodeURIComponent(sessionId)}`;
+
 async function errorFrom(res: Response): Promise<ApiError> {
   try {
     const body: unknown = await res.json();
@@ -58,6 +64,12 @@ export const fetchSessions = async (): Promise<WorkbenchRepository[]> => {
   if (!res.ok) throw await errorFrom(res);
   const body = await res.json() as { repositories?: WorkbenchRepository[] };
   return body.repositories ?? [];
+};
+
+export const fetchSession = async (sessionId: string): Promise<SessionMeta> => {
+  const res = await fetch(sessionRoot(sessionId));
+  if (!res.ok) throw await errorFrom(res);
+  return res.json();
 };
 
 export const fetchReport = async (sessionId: string): Promise<Report> => {
@@ -99,3 +111,37 @@ export const setChecks = (sessionId: string, checks: string[]) =>
 
 export const handoff = (sessionId: string) =>
   fetch(sessionEndpoint(sessionId, 'handoff'), { method: 'POST' }).catch(() => {});
+
+export const fetchPlan = async (sessionId: string): Promise<PlanResponse> => {
+  const res = await fetch(sessionEndpoint(sessionId, 'plan'));
+  if (!res.ok) throw await errorFrom(res);
+  return res.json();
+};
+
+export async function updatePlanState(
+  sessionId: string,
+  revision: number,
+  op: string,
+  body: Record<string, unknown> = {},
+): Promise<PlanStateResponse> {
+  const res = await fetch(sessionEndpoint(sessionId, 'plan/state'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ revision, op, ...body }),
+  });
+  if (!res.ok) throw await errorFrom(res);
+  return res.json();
+}
+
+export async function approvePlan(
+  sessionId: string,
+  hash: string,
+): Promise<PlanResponse> {
+  const res = await fetch(sessionEndpoint(sessionId, 'plan/approve'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ hash }),
+  });
+  if (!res.ok) throw await errorFrom(res);
+  return res.json();
+}

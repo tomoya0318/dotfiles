@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
+import { writeJsonFile } from './fileStore.js';
 
 export type Turn = { by: string; body: string };
 export type Comment = {
@@ -21,8 +21,7 @@ export function load(path: string): Thread {
 }
 
 export function save(path: string, t: Thread) {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(t, null, 1) + '\n');
+  writeJsonFile(path, t);
 }
 
 function nextId(cs: Comment[]) {

@@ -4,17 +4,21 @@ import { ReplyBox } from './ReplyBox';
 import { AUTHOR_NAME, isFinding, isHuman, LABEL_TEXT } from '../../lib/comment';
 import type { Comment } from '../../types/thread';
 
-export function CommentView({ c, onRemove, onReply, onResolve }: {
-  c: Comment; onRemove: () => void; onReply: (body: string) => void; onResolve: () => void;
+export function CommentView({ c, onRemove, onReply, onResolve, allowResolve = false }: {
+  c: Comment;
+  onRemove: () => void;
+  onReply?: (body: string) => void;
+  onResolve: () => void;
+  allowResolve?: boolean;
 }) {
   const [replying, setReplying] = useState(false);
   const [text, setText] = useState('');
-  const canReply = c.state !== 'resolved';
+  const canReply = c.state !== 'resolved' && onReply !== undefined;
   const finding = isFinding(c);
 
   const send = () => {
     if (!text.trim()) return;
-    onReply(text);
+    onReply?.(text);
     setText('');
     setReplying(false);
   };
@@ -29,8 +33,8 @@ export function CommentView({ c, onRemove, onReply, onResolve }: {
             : c.state === 'answered' ? '回答あり'
             : finding ? 'トリアージ待ち' : '未解決'}
         </span>
-        {finding && c.state !== 'resolved' && (
-          <button className="link" onClick={onResolve}>却下</button>
+        {(finding || allowResolve) && c.state !== 'resolved' && (
+          <button className="link" onClick={onResolve}>{finding ? '却下' : '解決'}</button>
         )}
         {!finding && c.turns.length === 1 && (
           <button className="link" onClick={onRemove}>削除</button>

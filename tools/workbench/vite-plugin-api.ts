@@ -2,13 +2,11 @@ import {
   basename,
   dirname,
   isAbsolute,
-  relative,
   resolve,
 } from 'node:path';
 import {
   existsSync,
   lstatSync,
-  mkdirSync,
   readFileSync,
   realpathSync,
   watch,
@@ -17,15 +15,25 @@ import {
 } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin, ViteDevServer } from 'vite';
+import { containedPath, ContainmentError } from './server/contained.js';
+import { PlanNotFoundError, readPlan } from './server/planDoc.js';
+import {
+  applyPlanOperation,
+  approvePlan,
+  consumePlanApproval,
+  getPlanStateResponse,
+  makePlanResponse,
+  PlanHttpError,
+  resetPlanApproval,
+  syncPlanState,
+} from './server/planStore.js';
 import { apply, load, save } from './server/threadStore.js';
 import { scanSessions, type WorkbenchSession } from './server/sessions.js';
-
-class ContainmentError extends Error {}
 
 function sendJson(
   res: ServerResponse,
   status: number,
-  body: Record<string, unknown> | unknown[],
+  body: unknown,
 ): void {
   res.statusCode = status;
   res.setHeader('content-type', 'application/json');
@@ -46,11 +54,6 @@ function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
   });
 }
 
-function isInside(parent: string, child: string): boolean {
-  const path = relative(parent, child);
-  return path === '' || (!path.startsWith('..') && !isAbsolute(path));
-}
-
 function realpathOrResolved(path: string): string {
   const absolute = resolve(path);
   try {
@@ -58,88 +61,6 @@ function realpathOrResolved(path: string): string {
   } catch {
     return absolute;
   }
-}
-
-function nearestExisting(path: string): string {
-  let current = path;
-  while (true) {
-    try {
-      lstatSync(current);
-      return current;
-    } catch {
-      const parent = dirname(current);
-      if (parent === current) throw new ContainmentError(`path has no existing parent: ${path}`);
-      current = parent;
-    }
-  }
-}
-
-function containedPath(
-  workDir: string,
-  relativePath: string,
-  createParent = false,
-): string {
-  const absoluteWorkDir = resolve(workDir);
-  const target = resolve(absoluteWorkDir, relativePath);
-  if (!isInside(absoluteWorkDir, target)) {
-    throw new ContainmentError(`path escapes work directory: ${relativePath}`);
-  }
-
-  let realWorkDir: string;
-  try {
-    realWorkDir = realpathSync(absoluteWorkDir);
-  } catch {
-    throw new ContainmentError(`work directory is missing: ${workDir}`);
-  }
-
-  const parent = dirname(target);
-  let realExistingParent: string;
-  try {
-    realExistingParent = realpathSync(nearestExisting(parent));
-  } catch {
-    throw new ContainmentError(`path parent cannot be resolved: ${relativePath}`);
-  }
-  if (!isInside(realWorkDir, realExistingParent)) {
-    throw new ContainmentError(`path parent escapes work directory: ${relativePath}`);
-  }
-
-  let parentExists = false;
-  try {
-    lstatSync(parent);
-    parentExists = true;
-  } catch {
-    // The nearest existing ancestor was checked above.
-  }
-  if (!parentExists && !createParent) return target;
-  if (!parentExists) mkdirSync(parent, { recursive: true });
-
-  let realParent: string;
-  try {
-    realParent = realpathSync(parent);
-  } catch {
-    throw new ContainmentError(`path parent is unavailable: ${relativePath}`);
-  }
-  if (!isInside(realWorkDir, realParent)) {
-    throw new ContainmentError(`path parent escapes work directory: ${relativePath}`);
-  }
-
-  try {
-    lstatSync(target);
-    const realTarget = realpathSync(target);
-    if (!isInside(realWorkDir, realTarget)) {
-      throw new ContainmentError(`path escapes work directory: ${relativePath}`);
-    }
-  } catch (error) {
-    if (error instanceof ContainmentError) throw error;
-    try {
-      lstatSync(target);
-      throw new ContainmentError(`path cannot be resolved: ${relativePath}`);
-    } catch (nestedError) {
-      if (nestedError instanceof ContainmentError) throw nestedError;
-    }
-  }
-
-  return target;
 }
 
 function requestPath(req: IncomingMessage): string {
@@ -155,6 +76,14 @@ function handleError(res: ServerResponse, error: unknown): void {
     sendJson(res, 403, { error: error.message });
     return;
   }
+  if (error instanceof PlanNotFoundError) {
+    sendJson(res, 404, { error: error.message });
+    return;
+  }
+  if (error instanceof PlanHttpError) {
+    sendJson(res, error.status, { error: error.message });
+    return;
+  }
   sendJson(res, 500, { error: error instanceof Error ? error.message : String(error) });
 }
 
@@ -167,6 +96,16 @@ export function workbenchApi(): Plugin {
         review?: FSWatcher;
       }>();
       const selfWrites = new Map<string, number>();
+      type ChangeKind = 'thread' | 'report' | 'plan' | 'plan-state';
+
+      const selfWriteKey = (sessionId: string, kind: ChangeKind): string =>
+        `${sessionId}:${kind}`;
+      const markSelfWrite = (
+        session: WorkbenchSession,
+        kind: ChangeKind,
+      ): void => {
+        selfWrites.set(selfWriteKey(session.id, kind), Date.now());
+      };
 
       const closeWatcher = (
         sessionId: string,
@@ -193,11 +132,10 @@ export function workbenchApi(): Plugin {
 
       const sendChange = (
         session: WorkbenchSession,
-        kind: 'thread' | 'report',
+        kind: ChangeKind,
       ): void => {
         if (
-          kind === 'thread'
-          && Date.now() - (selfWrites.get(session.id) ?? 0) < 500
+          Date.now() - (selfWrites.get(selfWriteKey(session.id, kind)) ?? 0) < 500
         ) {
           return;
         }
@@ -229,8 +167,18 @@ export function workbenchApi(): Plugin {
                 return;
               }
               const name = fileName?.toString();
-              if (name !== basename('thread.json') && name !== basename('report.json')) return;
-              const kind = name === 'thread.json' ? 'thread' : 'report';
+              if (
+                name !== basename('thread.json')
+                && name !== basename('report.json')
+                && name !== basename('plan.json')
+              ) {
+                return;
+              }
+              const kind = name === 'thread.json'
+                ? 'thread'
+                : name === 'plan.json'
+                  ? 'plan-state'
+                  : 'report';
               sendChange(session, kind);
             } catch {
               closeWatcher(session.id, 'review');
@@ -260,7 +208,22 @@ export function workbenchApi(): Plugin {
                   closeSessionWatchers(session.id);
                   return;
                 }
-                if (fileName?.toString() !== 'review') return;
+                const name = fileName?.toString();
+                if (name === 'plan.md') {
+                  try {
+                    const document = readPlan(session.workDir);
+                    syncPlanState(
+                      session.workDir,
+                      document,
+                      () => markSelfWrite(session, 'plan-state'),
+                    );
+                  } catch {
+                    // GET will report parse and containment errors to the client.
+                  }
+                  sendChange(session, 'plan');
+                  return;
+                }
+                if (name !== 'review') return;
 
                 closeWatcher(session.id, 'review');
                 if (!ensureReviewWatcher(session)) return;
@@ -331,6 +294,128 @@ export function workbenchApi(): Plugin {
           return;
         }
 
+        const sessionMatch = path.match(/^\/([^/]+)\/?$/);
+        if (sessionMatch) {
+          if (req.method !== 'GET') {
+            rejectMethod(res);
+            return;
+          }
+          const session = scanSessions().byId.get(sessionMatch[1]);
+          if (!session) {
+            sendJson(res, 404, { error: 'session not found' });
+            return;
+          }
+          sendJson(res, 200, {
+            name: session.name,
+            documents: session.documents,
+          });
+          return;
+        }
+
+        const planMatch = path.match(
+          /^\/([^/]+)\/plan(?:\/(state|approve|approve\/(consume|reset)))?\/?$/,
+        );
+        if (planMatch) {
+          const [, id, action] = planMatch;
+          const session = scanSessions().byId.get(id);
+          if (!session) {
+            sendJson(res, 404, { error: 'session not found' });
+            return;
+          }
+
+          ensureWatcher(session);
+          try {
+            const document = readPlan(session.workDir);
+            if (!action) {
+              if (req.method !== 'GET') {
+                rejectMethod(res);
+                return;
+              }
+              const synced = syncPlanState(
+                session.workDir,
+                document,
+                () => markSelfWrite(session, 'plan-state'),
+              );
+              sendJson(res, 200, makePlanResponse(document, synced));
+              return;
+            }
+
+            if (action === 'state') {
+              if (req.method === 'GET') {
+                const synced = syncPlanState(
+                  session.workDir,
+                  document,
+                  () => markSelfWrite(session, 'plan-state'),
+                );
+                sendJson(res, 200, getPlanStateResponse(document, synced));
+                return;
+              }
+              if (req.method === 'POST') {
+                const body = await readJson(req);
+                const currentDocument = readPlan(session.workDir);
+                sendJson(
+                  res,
+                  200,
+                  applyPlanOperation(
+                    session.workDir,
+                    currentDocument,
+                    body,
+                    () => markSelfWrite(session, 'plan-state'),
+                  ),
+                );
+                return;
+              }
+              rejectMethod(res);
+              return;
+            }
+
+            if (req.method !== 'POST') {
+              rejectMethod(res);
+              return;
+            }
+            const body = await readJson(req);
+            if (action === 'approve') {
+              sendJson(
+                res,
+                200,
+                approvePlan(
+                  session.workDir,
+                  body.hash,
+                  () => markSelfWrite(session, 'plan-state'),
+                ),
+              );
+              return;
+            }
+            if (action === 'approve/consume') {
+              const currentDocument = readPlan(session.workDir);
+              sendJson(
+                res,
+                200,
+                consumePlanApproval(
+                  session.workDir,
+                  currentDocument,
+                  body.nonce,
+                  () => markSelfWrite(session, 'plan-state'),
+                ),
+              );
+              return;
+            }
+            const currentDocument = readPlan(session.workDir);
+            sendJson(
+              res,
+              200,
+              resetPlanApproval(
+                session.workDir,
+                currentDocument,
+                () => markSelfWrite(session, 'plan-state'),
+              ),
+            );
+          } catch (error) {
+            handleError(res, error);
+          }
+          return;
+        }
+
         const match = path.match(/^\/([^/]+)\/(report|thread|handoff)\/?$/);
         if (!match) {
           next();
@@ -386,7 +471,7 @@ export function workbenchApi(): Plugin {
           if (req.method === 'POST') {
             const body = await readJson(req);
             const nextThread = apply(load(thread), String(body.op), body);
-            selfWrites.set(session.id, Date.now());
+            markSelfWrite(session, 'thread');
             save(thread, nextThread);
             sendJson(res, 200, nextThread);
             return;

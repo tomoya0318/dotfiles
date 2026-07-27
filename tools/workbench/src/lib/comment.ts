@@ -30,6 +30,10 @@ export const firstLine = (c: Comment) => (c.turns[0]?.body ?? '').trim().split('
 /** 所感は解決すべきものではないので、残数に数えない。 */
 export const countsAsOpen = (c: Comment) => c.state === 'open' && c.label !== 'note';
 
+export const countsAsPlanOpen = (
+  c: Pick<Comment, 'state' | 'label'>,
+) => c.state !== 'resolved' && c.label !== 'note';
+
 /** 再生成で行番号はずれるので、lineText で探し直す。見つからなければ迷子。 */
 export function resolveOffset(changes: ChangeData[], c: Comment): number | null {
   if (changes[c.offset]?.content === c.lineText) return c.offset;
