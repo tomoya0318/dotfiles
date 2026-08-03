@@ -18,6 +18,10 @@ window-inherit-working-directory = false
 
 # --- Keybind ---
 keybind = super+s=text:\x1bw\x0dd
+# 既定の super+enter=toggle_fullscreen を解放し、cmd+Enter を中のアプリへ通す
+# （Claude Code の送信キーに割り当てるため。フルスクリーンは super+ctrl+f に退避）
+keybind = super+enter=unbind
+keybind = super+ctrl+f=toggle_fullscreen
 
 # --- Font ---
 font-family = "UDEV Gothic 35NF"
