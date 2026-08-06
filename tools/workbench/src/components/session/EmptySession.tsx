@@ -21,7 +21,7 @@ export function EmptySession({ sessionId }: { sessionId: string }) {
     <main className="empty-session">
       <p className="eyebrow">workbench</p>
       <h1>まだ diff がありません</h1>
-      <p className="reason">このセッションは計画段階です。report.json が生成されるとレビューを開けます。</p>
+      <p className="reason">report.json はまだ生成されていません。生成されるとレビューを開けます。</p>
       <a className="home-link" href="/">作業一覧へ戻る</a>
     </main>
   );
