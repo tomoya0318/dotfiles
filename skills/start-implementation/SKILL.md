@@ -1,6 +1,6 @@
 ---
 name: start-implementation
-description: Starts an implementation with an investigation plan, an understanding gate, and adversarial plan and implementation reviews.
+description: Starts an implementation with an investigation, a user-approved plan, and adversarial plan and implementation reviews.
 disable-model-invocation: true
 argument-hint: /start-implementation <description>
 ---
@@ -15,24 +15,53 @@ argument-hint: /start-implementation <description>
 存在しなければ `/setup-impl-workflow` の実行を促し、設定が確定するまで実装しない。
 作業ディレクトリは設定の上書きがなければ `tmp/` とする。
 
+## 計画の単位
+
+1つの plan は、独立して撤回できる1つの要件を扱う。
+「これとあれを別々に revert できるか」で判定し、できるなら作業を分ける。
+例外は、一方が他方の前提で、分けると片方が動かせない場合だけ。
+
+`実装手順` が上限を超えるのも同じ信号として扱う。
+要件が大きすぎるか方針が回りくどいので、分けられるなら分け、分けられないなら方針を見直す。
+
+件数や差分の量では分けない。文言をまとめれば潜れるため。
+
+## 計画の構成
+
+`plan.md` は `概要`、`要件`、`方針`、`実装手順`、`リスク` の5節にする。節を増やさない。
+
+`概要` は、何を作るか、何を変えるか、スコープ、非スコープを書く。
+
+`要件` は、満たすべき状態を1件1見出しで書き、見出しに要件そのものを書く。
+本文には、なぜ要るかと、満たされたかを後から判定する方法を2〜4行で書く。
+AI が単独で決めてよいことは `要件` に書かない。
+
+`方針` は、外すと要件を満たさなくなる実装方針だけを1件1見出しで書き、見出しに結論を書く。
+本文には理由を3〜5行で書き、採らなかった案があれば1行で添える。
+設定や言語仕様から導かれる表現方法は書かない。実装時に分かる。
+該当が無ければ空でよい。
+
+`実装手順` は、要件ごとに見出しを立て、その下へ1要件につき3〜5行で書く。
+フェーズに分けない。現状の作り、検証方法、触らないものは書かない。
+承認の対象にせず、実装検証でも参照しない。実現性を承認前に検査するために書く。
+
+`リスク` は、確かめていない事実と、起きた場合の影響と、確度を1件2〜3行で書く。
+
 ## 書き方
 
 日本語で書く。一文ごとに改行し、段落は空行で区切る。
 
 短く、要点だけを書く。前置きと但し書きに文字数を使わない。
-検討の経緯は書かず、結論と理由と代替案の評価だけを残す。
-同じ判断を複数の節へ重複させない。
+検討の経緯は書かず、結論と理由だけを残す。判断軸を本文に別立てしない。
+同じことを複数の節へ重複させない。
 
 確かめていないことは、確かめていないまま書く。推量を断定に変えない。
 「重要なのは」「〜において」「多角的に」のような、論点を増やさない言い回しを使わない。
 
-`概要`、`判断`、`方針`、`リスク` は人間が読む節なので特に短くする。
-`現状の作り` と `実装手順` は実装 AI 向けなので、短さより具体の精度を優先する。
-
 ## 規模の判定
 
 対象が2ファイル以内で、調査が数回の grep で済むなら、手順2・4・7 の委譲を飛ばす。
-main が直接 `plan.md` を書いて実装し、手順8 の実装検証だけ残す。
+main が自分で調べて `plan.md` を書いて実装し、手順8 の実装検証だけ残す。
 
 サブエージェントは、広い範囲にまたがる調査と、範囲が重ならない単位へ分けられる実装にだけ使う。
 main が数回の操作で終わる作業を委譲しない。台数分のコストと時間がそのまま乗る。
@@ -41,50 +70,42 @@ main が数回の操作で終わる作業を委譲しない。台数分のコス
 
 1. 作業名は英語のハイフン区切りで渡す。ユーザーが説明的な日本語・文章の名前を指定した場合は、main が先に変換する。
    `init-work-dir.sh "<作業名>" "<base-dir>"` を実行し、JSON の作業パスを読む。
-   `~/dev/workbench` と `node_modules` がある場合は、任意で `http://localhost:5170/api/health` を確認し、`workbench` が応答しなければ共有 dev サーバを起動してよい。
-   サーバを起動できなくても作業開始は失敗させず、`init-work-dir.sh` 自体からは起動しない。
-2. [planning-prompt.md](references/planning-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから read-only subagent に渡して調査する。
-3. main が要件と調査結果から `概要` を書き、調査結果の `判断`、`方針`、`現状の作り`、`実装手順`、`リスク` を計画テンプレートの同名節へ転記する。
-   調査結果の `実装に不可欠なファイル` は main への受け渡しにだけ使い、`plan.md` へ転記しない。
+2. Plan エージェントに調査を委譲する。`Edit` と `Write` を持たないが `Bash` は持つので、状態を変える操作の禁止は明示する。
+   推測で確認していない事実を埋めさせない。
+   返させるのは、触る対象の責務とデータフローと不変条件、実装に不可欠なファイル3〜5個、人間の判断が要る点、確かめられなかったことの4つとする。
+   `plan.md` の節や段取りは書かせない。plan を書くのは常に main である。
+3. main が調査結果から `plan.md` を書く。
+   `要件` が独立して撤回できる単位に分かれていなければ、ここで作業を分ける。
 4. [plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから、実装者とは別の fresh な codex に渡し、指摘だけを `review.md` の「計画検証」へ記録する。
 5. 指摘を計画へ反映し、反映内容を同節へ追記する。
-6. 作業ディレクトリを `WORK_DIR` とし、`GET http://localhost:5170/api/resolve?workDir=...` でセッション ID を取得する。
-   ユーザーには `http://localhost:5170/s/<id>?view=plan` を伝える。
-   `判断` に accept されていないものが残る、または `question` コメントが未解決の場合は理解ゲートを通過させず、必要なら `spawn-consult.sh` を使う。
-   `confirmations` と `approval` は AI がファイルへ書かず、workbench での人間の操作だけに委ねる。
-   待機前に次のように承認をリセットし、残っている `review/plan-approved` とサーバ上の承認状態を両方消す。
-   ```bash
-   SESSION_ID="$(curl -fsS -G --data-urlencode "workDir=$WORK_DIR" \
-     http://localhost:5170/api/resolve | jq -r .id)"
-   curl -fsS -X POST -H 'content-type: application/json' -d '{}' \
-     "http://localhost:5170/api/sessions/$SESSION_ID/plan/approve/reset" >/dev/null
-   ```
-   `until [ -f "$WORK_DIR/review/plan-approved" ]; do sleep 3; done` をバックグラウンドのシェル実行として開始し、タイムアウトを付けずにユーザーの承認を待つ。
-   再開時はセンチネルの `nonce` を `POST /plan/approve/consume` へ渡す。
-   応答の `approval.nonce` と `approval.planHash` がセンチネルと一致し、センチネルの `planHash` が現在の `plan.md` のバイト列 SHA-256 と一致することを照合する。
-   ```bash
-   SENTINEL_JSON="$(cat "$WORK_DIR/review/plan-approved")"
-   NONCE="$(printf '%s' "$SENTINEL_JSON" | jq -r .nonce)"
-   APPROVED_HASH="$(printf '%s' "$SENTINEL_JSON" | jq -r .planHash)"
-   CONSUMED_JSON="$(curl -fsS -X POST -H 'content-type: application/json' \
-     -d "$(jq -cn --arg nonce "$NONCE" '{nonce:$nonce}')" \
-     "http://localhost:5170/api/sessions/$SESSION_ID/plan/approve/consume")"
-   CURRENT_HASH="$(shasum -a 256 "$WORK_DIR/plan.md" | awk '{print $1}')"
-   test "$(printf '%s' "$CONSUMED_JSON" | jq -r .approval.nonce)" = "$NONCE"
-   test "$(printf '%s' "$CONSUMED_JSON" | jq -r .approval.planHash)" = "$APPROVED_HASH"
-   test "$CURRENT_HASH" = "$APPROVED_HASH"
-   test ! -f "$WORK_DIR/review/plan-approved"
-   ```
-   consume が失敗した場合、またはいずれかの照合が外れた場合は実装せずユーザーへ戻す。
-   consume に成功したセンチネルはサーバが削除するため、残っていないことを確認してから実装へ進む。
-   ユーザーの承認前にコードを変更しない。
+   `要件` が増えたなら、分割をもう一度判定する。
+6. `plan.md` のパスをユーザーへ伝え、`要件` と `方針` の見出しを列挙して承認を求める。
+   承認を得るまでコードを変更しない。
 7. 承認後に実装する。
    規模が大きく、範囲が重ならない単位へ分けられるなら、codex plugin の codex-rescue subagent へ委譲する。分けた単位は並行させてよい。
-   codex plugin が利用できない環境では fresh な subagent に委譲する。
-   それ以外は main が自分で実装する。
+   codex plugin が利用できない環境では fresh な subagent に委譲する。それ以外は main が自分で実装する。
+   委譲するときは、調査で分かった現状の作りを委譲プロンプトへ書く。`plan.md` には書かない。
+   実装中に新しい判断が要ると分かったら、そこで止めてユーザーに訊く。
+   `要件` と `方針` から外れるときは訊く。それ以外の細部は実装が決めてよい。
    設定の DoD コマンドを変更範囲に応じて main が実行する。
 8. [impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから、実装者とは別の fresh な codex に渡し、修正させず指摘だけを「実装検証」へ追記する。
    指摘をどう直すかはユーザーが判断し、承認された指摘だけを実装側へ修正させる。
+
+## コミット
+
+コミットは1つにする。plan が単位そのものなので切り分けない。
+
+本文には `plan.md` の `概要`、`要件`、`方針`、`リスク` をそのまま入れる。要約しない。
+`実装手順` は入れない。差分が示すうえに、承認も検証もしていないためである。
+
+コード側で `要件` と食い違う箇所があれば、コミット前にユーザーへ伝える。
+`plan.md` を後から書き換えて辻褄を合わせない。
+
+## ADR
+
+撤回しにくく長期的な影響を持つ実装方針だけ、`adr-writing` で ADR に残す。簡単には書かない。
+プロジェクトの正本に書かれる判断は ADR にしない。正本が二重化する。
+ADR ディレクトリは最初の ADR を書くときに作る。
 
 ## バイアス分離
 

@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Commits the working tree, carrying the full plan text as the message when a plan exists, and otherwise splitting the diff into one commit per intent.
+description: Splits the working tree into one commit per intent and writes each message.
 disable-model-invocation: true
 argument-hint: /commit
 ---
@@ -11,13 +11,7 @@ argument-hint: /commit
 
 ## まず単位を決める
 
-`git status` と `git diff` を確認し、作業ディレクトリ `tmp/NNNN_<name>/plan.md` の有無で分ける。
-
-**plan がある** … コミットは1つ。plan が単位そのものなので切り分けない。
-plan が複数ある、またはどれが対象か曖昧なときはユーザーに確認する。
-
-**plan が無い** … 差分を意図で切り分け、**意図ごとに1コミットにする**。
-plan を通していない変更は、無関係なものが溜まっていることが多い。
+`git status` と `git diff` を確認し、差分を意図で切り分け、**意図ごとに1コミットにする**。
 1つにまとめると、あとで片方だけ revert できなくなる。
 
 切り分けの単位は **1つの決定とその波及**。
@@ -42,13 +36,10 @@ type は `feat`、`fix`、`docs`、`style`、`refactor` のいずれかにする
 
 ## 本文
 
-plan があれば**全文を本文に入れる**。要約しない。節を落とさない。
-
-コード側で plan と食い違う箇所があれば、コミット前にユーザーへ伝える。
-plan を後から書き換えて辻褄を合わせない。
-
-plan が無ければ、なぜその変更をしたかを数行書く。主題だけで済ませない。
+なぜその変更をしたかを数行書く。主題だけで済ませない。
 差分を読めば分かることは書かない。書くのは選んだ理由と、その選択が外れたときに何が起きるか。
+
+`/start-implementation` の plan を通した変更なら、本文の作り方はその skill の「コミット」節に従う。
 
 ## レビューの積み残し
 

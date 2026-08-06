@@ -17,41 +17,14 @@ WORK_DIR="$BASE_DIR/${NEXT_NUM}_${SAFE_NAME}"; mkdir "$WORK_DIR"; TODAY=$(date +
   cat <<'EOF'
 
 ## 概要
-<!--
-level: focus。
-何を作るか、何を変えるか、スコープ、非スコープを書く。
--->
 
-## 判断
-<!--
-level: decision。
-AI が自分で決めて先に進むと後で問題になる、人間の好みや選択が要る判断を1件1見出しで書く。
-見出しに推奨する結論を書き、最初の子見出しより前に本文の導入文を置かない。
--->
+## 要件
 
 ## 方針
-<!--
-level: focus。
-技術的に決まる方針を1件1見出しで書き、見出しに結論を書く。
--->
-
-## 現状の作り
-<!--
-level: detail。
-対象の責務、データフロー、不変条件など、実装に関係する現在の作りを書く。
--->
 
 ## 実装手順
-<!--
-level: detail。
-フェーズと具体的な実装タスクを書く。
--->
 
 ## リスク
-<!--
-level: focus。
-確かめていないことを含むリスクを、起きた場合の影響と確度を添えて1件1見出しで書く。
--->
 EOF
 } > "$WORK_DIR/plan.md"
 {
@@ -62,7 +35,7 @@ EOF
 <!-- 指摘表: # | 指摘 | 確信度 | 対応（計画へ反映 / スキップ＋理由） -->
 
 ## 実装検証
-<!-- 指摘表: # | 指摘 | 確信度 | 対応 -->
+<!-- 指摘表: # | 分類（欠陥 / 要件外） | 指摘 | 確信度 | 対応 -->
 EOF
 } > "$WORK_DIR/review.md"
 printf '{"work_dir":"%s","plan_file":"%s/plan.md","review_file":"%s/review.md","sequence_number":"%s","work_name":"%s"}\n' "$WORK_DIR" "$WORK_DIR" "$WORK_DIR" "$NEXT_NUM" "$SAFE_NAME"
