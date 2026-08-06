@@ -6,23 +6,12 @@ import {
   fetchSession,
   type SessionMeta,
 } from '../../api/client';
-import type { SessionView } from '../../types/plan';
-import { PlanApp } from '../plan/PlanApp';
 import { EmptySession } from './EmptySession';
-import { ViewToggle } from './ViewToggle';
 
 type WorkbenchChange = {
   sessionId?: unknown;
   kind?: unknown;
 };
-
-function requestedView(meta: SessionMeta): SessionView {
-  const requested = new URLSearchParams(location.search).get('view');
-  if (requested === 'plan' && meta.documents.plan) return 'plan';
-  if (requested === 'review') return 'review';
-  if (meta.documents.report) return 'review';
-  return meta.documents.plan ? 'plan' : 'review';
-}
 
 function ReviewView({
   sessionId,
@@ -78,22 +67,14 @@ function ReviewView({
   return <App sessionId={sessionId} />;
 }
 
-export function SessionShell({
-  sessionId,
-  initialView,
-}: {
-  sessionId: string;
-  initialView: SessionView | null;
-}) {
+export function SessionShell({ sessionId }: { sessionId: string }) {
   const [meta, setMeta] = useState<SessionMeta | null>(null);
-  const [view, setView] = useState<SessionView>(initialView ?? 'review');
   const [error, setError] = useState('');
 
   const pullMeta = useCallback(() => {
     fetchSession(sessionId)
       .then(next => {
         setMeta(next);
-        setView(requestedView(next));
         setError('');
       })
       .catch(reason => setError(reason instanceof Error ? reason.message : String(reason)));
@@ -101,30 +82,15 @@ export function SessionShell({
 
   useEffect(() => {
     pullMeta();
-    const navigate = () => {
-      setMeta(current => {
-        if (current) setView(requestedView(current));
-        return current;
-      });
-    };
     const changed = (data: WorkbenchChange) => {
       if (data.sessionId !== sessionId) return;
-      if (data.kind === 'plan' || data.kind === 'report') pullMeta();
+      if (data.kind === 'report') pullMeta();
     };
-    addEventListener('popstate', navigate);
     import.meta.hot?.on('workbench:changed', changed);
     return () => {
-      removeEventListener('popstate', navigate);
       import.meta.hot?.off('workbench:changed', changed);
     };
   }, [pullMeta, sessionId]);
-
-  const changeView = useCallback((next: SessionView) => {
-    const url = new URL(location.href);
-    url.searchParams.set('view', next);
-    history.pushState(null, '', url);
-    setView(next);
-  }, []);
 
   if (error) {
     return (
@@ -136,23 +102,11 @@ export function SessionShell({
   }
   if (!meta) return <main className="empty-session"><p>セッションを読み込んでいます。</p></main>;
 
-  if (view === 'plan' && meta.documents.plan) {
-    return (
-      <PlanApp
-        sessionId={sessionId}
-        session={meta}
-        view={view}
-        onViewChange={changeView}
-      />
-    );
-  }
-
   return (
     <>
       <nav className="session-shell-head">
         <a className="home-link" href="/">workbench</a>
         <strong>{meta.name}</strong>
-        <ViewToggle view="review" hasPlan={meta.documents.plan} onChange={changeView} />
       </nav>
       <ReviewView sessionId={sessionId} hasReport={meta.documents.report} />
     </>

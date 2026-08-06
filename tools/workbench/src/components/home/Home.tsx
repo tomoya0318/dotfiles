@@ -6,7 +6,6 @@ import {
 } from '../../api/client';
 
 const DOCUMENT_LABELS = {
-  plan: 'plan',
   review: 'review',
   report: 'report',
   thread: 'thread',

@@ -21,7 +21,6 @@ type Worktree = {
 };
 
 export type SessionDocuments = {
-  plan: boolean;
   review: boolean;
   report: boolean;
   thread: boolean;
@@ -106,7 +105,6 @@ function documentState(workDir: string): {
   updatedAt: string;
 } {
   const paths = {
-    plan: join(workDir, 'plan.md'),
     review: join(workDir, 'review.md'),
     report: join(workDir, 'review', 'report.json'),
     thread: join(workDir, 'review', 'thread.json'),
@@ -120,7 +118,6 @@ function documentState(workDir: string): {
     }
   }
   const documents = {
-    plan: metadata.plan !== null,
     review: metadata.review !== null,
     report: metadata.report !== null,
     thread: metadata.thread !== null,

@@ -16,17 +16,6 @@ import {
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin, ViteDevServer } from 'vite';
 import { containedPath, ContainmentError } from './server/contained.js';
-import { PlanNotFoundError, readPlan } from './server/planDoc.js';
-import {
-  applyPlanOperation,
-  approvePlan,
-  consumePlanApproval,
-  getPlanStateResponse,
-  makePlanResponse,
-  PlanHttpError,
-  resetPlanApproval,
-  syncPlanState,
-} from './server/planStore.js';
 import { apply, load, save } from './server/threadStore.js';
 import { scanSessions, type WorkbenchSession } from './server/sessions.js';
 
@@ -76,14 +65,6 @@ function handleError(res: ServerResponse, error: unknown): void {
     sendJson(res, 403, { error: error.message });
     return;
   }
-  if (error instanceof PlanNotFoundError) {
-    sendJson(res, 404, { error: error.message });
-    return;
-  }
-  if (error instanceof PlanHttpError) {
-    sendJson(res, error.status, { error: error.message });
-    return;
-  }
   sendJson(res, 500, { error: error instanceof Error ? error.message : String(error) });
 }
 
@@ -96,7 +77,7 @@ export function workbenchApi(): Plugin {
         review?: FSWatcher;
       }>();
       const selfWrites = new Map<string, number>();
-      type ChangeKind = 'thread' | 'report' | 'plan' | 'plan-state';
+      type ChangeKind = 'thread' | 'report';
 
       const selfWriteKey = (sessionId: string, kind: ChangeKind): string =>
         `${sessionId}:${kind}`;
@@ -170,16 +151,10 @@ export function workbenchApi(): Plugin {
               if (
                 name !== basename('thread.json')
                 && name !== basename('report.json')
-                && name !== basename('plan.json')
               ) {
                 return;
               }
-              const kind = name === 'thread.json'
-                ? 'thread'
-                : name === 'plan.json'
-                  ? 'plan-state'
-                  : 'report';
-              sendChange(session, kind);
+              sendChange(session, name === 'thread.json' ? 'thread' : 'report');
             } catch {
               closeWatcher(session.id, 'review');
             }
@@ -208,22 +183,7 @@ export function workbenchApi(): Plugin {
                   closeSessionWatchers(session.id);
                   return;
                 }
-                const name = fileName?.toString();
-                if (name === 'plan.md') {
-                  try {
-                    const document = readPlan(session.workDir);
-                    syncPlanState(
-                      session.workDir,
-                      document,
-                      () => markSelfWrite(session, 'plan-state'),
-                    );
-                  } catch {
-                    // GET will report parse and containment errors to the client.
-                  }
-                  sendChange(session, 'plan');
-                  return;
-                }
-                if (name !== 'review') return;
+                if (fileName?.toString() !== 'review') return;
 
                 closeWatcher(session.id, 'review');
                 if (!ensureReviewWatcher(session)) return;
@@ -309,110 +269,6 @@ export function workbenchApi(): Plugin {
             name: session.name,
             documents: session.documents,
           });
-          return;
-        }
-
-        const planMatch = path.match(
-          /^\/([^/]+)\/plan(?:\/(state|approve|approve\/(consume|reset)))?\/?$/,
-        );
-        if (planMatch) {
-          const [, id, action] = planMatch;
-          const session = scanSessions().byId.get(id);
-          if (!session) {
-            sendJson(res, 404, { error: 'session not found' });
-            return;
-          }
-
-          ensureWatcher(session);
-          try {
-            const document = readPlan(session.workDir);
-            if (!action) {
-              if (req.method !== 'GET') {
-                rejectMethod(res);
-                return;
-              }
-              const synced = syncPlanState(
-                session.workDir,
-                document,
-                () => markSelfWrite(session, 'plan-state'),
-              );
-              sendJson(res, 200, makePlanResponse(document, synced));
-              return;
-            }
-
-            if (action === 'state') {
-              if (req.method === 'GET') {
-                const synced = syncPlanState(
-                  session.workDir,
-                  document,
-                  () => markSelfWrite(session, 'plan-state'),
-                );
-                sendJson(res, 200, getPlanStateResponse(document, synced));
-                return;
-              }
-              if (req.method === 'POST') {
-                const body = await readJson(req);
-                const currentDocument = readPlan(session.workDir);
-                sendJson(
-                  res,
-                  200,
-                  applyPlanOperation(
-                    session.workDir,
-                    currentDocument,
-                    body,
-                    () => markSelfWrite(session, 'plan-state'),
-                  ),
-                );
-                return;
-              }
-              rejectMethod(res);
-              return;
-            }
-
-            if (req.method !== 'POST') {
-              rejectMethod(res);
-              return;
-            }
-            const body = await readJson(req);
-            if (action === 'approve') {
-              sendJson(
-                res,
-                200,
-                approvePlan(
-                  session.workDir,
-                  body.hash,
-                  () => markSelfWrite(session, 'plan-state'),
-                ),
-              );
-              return;
-            }
-            if (action === 'approve/consume') {
-              const currentDocument = readPlan(session.workDir);
-              sendJson(
-                res,
-                200,
-                consumePlanApproval(
-                  session.workDir,
-                  currentDocument,
-                  body.nonce,
-                  () => markSelfWrite(session, 'plan-state'),
-                ),
-              );
-              return;
-            }
-            const currentDocument = readPlan(session.workDir);
-            sendJson(
-              res,
-              200,
-              resetPlanApproval(
-                session.workDir,
-                currentDocument,
-                () => markSelfWrite(session, 'plan-state'),
-              ),
-            );
-          } catch (error) {
-            handleError(res, error);
-          }
           return;
         }
 
