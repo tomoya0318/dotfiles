@@ -15,8 +15,21 @@ CTRL = re.compile(r'\b(if|elif|else|for|while|try|except|catch|switch|case|final
 CONF = re.compile(r'[（(]?\s*確信度\s*[:：]\s*(高|中|低)\s*[）)]?\s*[。.]?\s*$')
 
 
-def git(repo, *args):
-    return subprocess.run(['git', '-C', repo, *args], capture_output=True, text=True, check=True).stdout
+def git(repo, *args, check=True):
+    r = subprocess.run(['git', '-C', repo, *args], capture_output=True, text=True)
+    if check and r.returncode != 0:
+        raise subprocess.CalledProcessError(r.returncode, r.args, r.stdout, r.stderr)
+    return r.stdout
+
+
+def untracked(repo):
+    return [p for p in git(repo, 'ls-files', '--others', '--exclude-standard').splitlines() if p]
+
+
+def untracked_patch(repo, paths):
+    """未追跡ファイルを index に触れずに差分化する。--no-index は差異があると 1 を返すので check しない。"""
+    return ''.join(git(repo, 'diff', '--no-index', '-U3', '/dev/null', p, check=False)
+                   for p in paths)
 
 
 def split_files(patch):
@@ -80,10 +93,13 @@ def core_candidate(kinds):
     return True
 
 
-def file_ops(repo, ref):
+def file_ops(repo, ref, uncommitted=False, extra=()):
     """移動を「同じ配置換え」でまとめ、決定要素にする。新規・削除はディレクトリ単位でまとめる。"""
-    raw = git(repo, 'show', ref, '-M', '--format=', '--raw')
+    raw = (git(repo, 'diff', ref, '-M', '--raw') if uncommitted
+           else git(repo, 'show', ref, '-M', '--format=', '--raw'))
     moves, adds, dels = [], [], []
+    for p in extra:
+        adds.append({'status': 'A', 'old': p, 'new': p, 'silent': False})
     for line in raw.splitlines():
         if not line.startswith(':'):
             continue
@@ -248,6 +264,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('repo')
     ap.add_argument('ref')
+    ap.add_argument('--uncommitted', action='store_true',
+                    help='<ref> と作業ツリーを比べる。未追跡ファイルも含め、index は触らない')
     ap.add_argument('--groups', help='AI が返したグルーピング JSON')
     ap.add_argument('--thread', default='.review/thread.json',
                     help='行コメントの永続物。存在しなければ空として扱う')
@@ -256,7 +274,10 @@ def main():
     ap.add_argument('-o', '--out', default='report.json')
     a = ap.parse_args()
 
-    patch = git(a.repo, 'show', a.ref, '-M', '--format=', '--patch', '-U3')
+    extra = untracked(a.repo) if a.uncommitted else []
+    patch = (git(a.repo, 'diff', a.ref, '-M', '--patch', '-U3') + untracked_patch(a.repo, extra)
+             if a.uncommitted
+             else git(a.repo, 'show', a.ref, '-M', '--format=', '--patch', '-U3'))
     files, hunks, n = [], [], 0
     for i, f in enumerate(split_files(patch)):
         hs = split_hunks(f['raw'])
@@ -272,7 +293,7 @@ def main():
         files.append({'id': f'F{i}', 'old': f['old'], 'new': f['new'],
                       'path': f['path'], 'diff': f['raw'], 'hunks': ids})
 
-    ops = file_ops(a.repo, a.ref)
+    ops = file_ops(a.repo, a.ref, a.uncommitted, extra)
     groups = json.load(open(a.groups))['groups'] if a.groups else []
     if groups:
         groups = attach_ripple(groups, hunks, ops)
@@ -291,7 +312,8 @@ def main():
 
     report = {
         'ref': a.ref,
-        'subject': git(a.repo, 'log', '-1', '--pretty=%s', a.ref).strip(),
+        'subject': (f'未コミットの変更 ({a.ref})' if a.uncommitted
+                    else git(a.repo, 'log', '-1', '--pretty=%s', a.ref).strip()),
         'threadPath': a.thread,
         'repo': os.path.abspath(a.repo),
         'stats': {'files': len(files), 'hunks': len(hunks),

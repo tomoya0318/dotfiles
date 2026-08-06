@@ -35,6 +35,9 @@ ID はチェックアウトの絶対パスと作業ディレクトリ名から�
 # 1. hunk とファイル操作を出す
 python3 tools/gen.py <repo> <ref> -o <work>/review/report.json
 
+# 未コミットの変更を見るなら --uncommitted を付ける（未追跡ファイルも含む。index は触らない）
+python3 tools/gen.py <repo> HEAD --uncommitted -o <work>/review/report.json
+
 # 2. AI にグルーピングと理由文を書かせて groups.json を得る（skill の手順3）
 
 # 3. groups と findings と thread を畳み込む
@@ -47,6 +50,10 @@ python3 tools/gen.py <repo> <ref> \
 
 `--findings` は実装検証の指摘を取り込むときだけ渡す。
 省くと findings は反映されない。
+
+`--uncommitted` を使う場合は、再生成のときも同じフラグを付ける。
+`report.json` は生成時点の写しなので、レビュー中にコードを直すと hunk がずれる。
+コメントは `lineText` で照合し直すため迷子になるだけで壊れないが、ずれたら再生成する。
 
 ## データと監視
 

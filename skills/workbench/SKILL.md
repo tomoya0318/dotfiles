@@ -35,6 +35,11 @@ argument-hint: /workbench [<ref-or-range>]
    python3 ~/dev/workbench/tools/gen.py <repo> <ref> -o <work>/review/report.json
    ```
 
+   まだコミットしていない変更を見るなら `--uncommitted` を付け、`<ref>` は比較元にする。
+   `HEAD --uncommitted` で作業ツリーの変更、`main --uncommitted` でブランチの変更と未コミット分をまとめて見る。
+   未追跡ファイルも含み、index は変更しない。
+   コミット単位は差分を読んでから決めるものなので、レビューのために先にコミットしない。
+
    核候補が20件未満なら、この手順を中止して差分を直接読む。
 
 3. [grouping-prompt.md](references/grouping-prompt.md) を read-only subagent に渡し、グルーピングと理由文を書かせる。
