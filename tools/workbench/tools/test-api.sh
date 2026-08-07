@@ -254,6 +254,38 @@ check 'GET report が ref を返す' 'test-ref' \
   "$(curl -sS "$BASE/api/sessions/$SESSION_ID/report" | jq -r .ref)"
 
 echo
+echo "gen.py の指摘メタデータ"
+GEN_REPO="$WORK/gen-repo"
+GEN_REVIEW="$WORK/gen-review"
+mkdir -p "$GEN_REPO" "$GEN_REVIEW"
+git init -q "$GEN_REPO"
+printf 'base\n' > "$GEN_REPO/a.txt"
+git -C "$GEN_REPO" add a.txt
+git -C "$GEN_REPO" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -qm base
+printf 'changed\n' > "$GEN_REPO/a.txt"
+cat > "$GEN_REVIEW/findings.json" <<'EOF'
+{"findings":[{"hunk":"h001","line":"changed","classification":"欠陥","confidence":"高","body":"要件を満たさない"}]}
+EOF
+python3 "$APP_DIR/tools/gen.py" "$GEN_REPO" HEAD --uncommitted \
+  --findings "$GEN_REVIEW/findings.json" --thread "$GEN_REVIEW/thread.json" \
+  -o "$GEN_REVIEW/report.json" >/dev/null
+check 'gen.py が classification を thread.json に保存する' '欠陥' \
+  "$(jq -r '.comments[0].classification' "$GEN_REVIEW/thread.json")"
+check 'gen.py が classification を report.json に含める' '欠陥' \
+  "$(jq -r '.thread.comments[0].classification' "$GEN_REVIEW/report.json")"
+cat > "$GEN_REVIEW/findings-old.json" <<'EOF'
+{"findings":[{"hunk":"h001","line":"changed","body":"旧形式の指摘"}]}
+EOF
+python3 "$APP_DIR/tools/gen.py" "$GEN_REPO" HEAD --uncommitted \
+  --findings "$GEN_REVIEW/findings-old.json" --thread "$GEN_REVIEW/thread-old.json" \
+  -o "$GEN_REVIEW/report-old.json" >/dev/null
+check 'classification がない旧 findings は thread.json で省略される' 'false' \
+  "$(jq '.comments[0] | has("classification")' "$GEN_REVIEW/thread-old.json")"
+check 'classification がない旧 findings は report.json で省略される' 'false' \
+  "$(jq '.thread.comments[0] | has("classification")' "$GEN_REVIEW/report-old.json")"
+
+echo
 echo "thread の初期状態"
 check 'thread が無いときは空スレッド' \
   '0 0' "$(curl -sS "$BASE/api/sessions/$SESSION_ID/thread" | jq -r '"\(.comments|length) \(.checks|length)"')"

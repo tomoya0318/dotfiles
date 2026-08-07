@@ -5,6 +5,7 @@ export type Label = (typeof LABELS)[number];
 /** 'ai' は旧形式。誰が答えたかを残さないと Claude と Codex を区別できない。 */
 export type Author = 'you' | 'claude' | 'codex' | 'ai';
 export type Turn = { by: Author; body: string };
+export type Classification = '欠陥' | '要件外';
 
 export type Comment = {
   id: string;
@@ -14,6 +15,8 @@ export type Comment = {
   lineText: string;
   /** 人間発のコメントだけが持つ。AI 発の指摘には無い */
   label?: Label;
+  /** AI 発の指摘だけが持つ */
+  classification?: Classification;
   /** AI 発の指摘だけが持つ */
   confidence?: '高' | '中' | '低';
   turns: Turn[];

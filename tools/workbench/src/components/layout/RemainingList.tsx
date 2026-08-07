@@ -23,6 +23,7 @@ export function RemainingList({ progress, jumpTo }: {
             <span className={`chip ${isFinding(c) ? 'finding' : `l-${c.label}`}`}>
               {isFinding(c) ? '指摘' : LABEL_TEXT[c.label ?? 'question']}
             </span>
+            {c.classification && <span className="chip classification">{c.classification}</span>}
             {c.confidence && <span className={`chip conf c-${c.confidence}`}>{c.confidence}</span>}
             <span className="txt">{firstLine(c)}</span>
           </button>

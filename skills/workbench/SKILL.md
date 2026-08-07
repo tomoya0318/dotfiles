@@ -52,12 +52,13 @@ argument-hint: /workbench [<ref-or-range>]
    ```json
    { "findings": [
      { "hunk": "h030", "line": "self.db.commit()", "by": "codex",
-       "confidence": "高", "body": "…" }
+       "classification": "欠陥", "confidence": "高", "body": "…" }
    ] }
    ```
 
    `line` は差分の中の文字列。完全一致しなくても近い行に着地する。
    `confidence` はバッジで出る。本文末尾に「確信度: 高」と書いてあれば自動で抜き出す。
+   `classification` は `欠陥` または `要件外` の注釈としてバッジで出る。省略した古い指摘も読み込める。
    hunk ID を持たない指摘は取り込まない。file:line しか無ければ、その位置を含む hunk を `report.json` から引く。
 
 5. groups と findings と thread を畳み込んで再生成する。

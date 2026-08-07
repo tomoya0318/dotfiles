@@ -27,6 +27,7 @@ export function CommentView({ c, onRemove, onReply, onResolve, allowResolve = fa
     <div className={`comment ${c.state} ${finding ? 'finding' : `l-${c.label}`}`} id={`c-${c.id}`}>
       <div className="speaker">
         <span className="tag">{finding ? '指摘' : LABEL_TEXT[c.label ?? 'question']}</span>
+        {c.classification && <span className="classification">分類 {c.classification}</span>}
         {c.confidence && <span className={`conf c-${c.confidence}`}>確信度 {c.confidence}</span>}
         <span className="state">
           {c.state === 'resolved' ? '解決'

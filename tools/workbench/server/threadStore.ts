@@ -4,7 +4,8 @@ import { writeJsonFile } from './fileStore.js';
 export type Turn = { by: string; body: string };
 export type Comment = {
   id: string; hunk: string; side: string; offset: number; lineText: string;
-  label?: string; turns: Turn[]; state: string; key?: string; confidence?: string;
+  label?: string; turns: Turn[]; state: string; key?: string;
+  classification?: string; confidence?: string;
 };
 export type Thread = { comments: Comment[]; checks: string[] };
 

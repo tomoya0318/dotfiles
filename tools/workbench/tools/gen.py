@@ -241,6 +241,7 @@ def import_findings(thread, payload, files, hunks):
         # バッジで出すので本文からは外す
         body_text = (f.get('body') or '').strip()
         conf = f.get('confidence')
+        classification = f.get('classification')
         m = CONF.search(body_text)
         if m:
             conf = conf or m.group(1)
@@ -253,6 +254,7 @@ def import_findings(thread, payload, files, hunks):
             **anchor,
             'turns': [{'by': f.get('by', 'codex'), 'body': body_text}],
             'state': 'open',
+            **({'classification': classification} if classification else {}),
             **({'confidence': conf} if conf else {}),
         })
         existing.add(key)
