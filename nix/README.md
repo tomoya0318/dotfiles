@@ -34,8 +34,8 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tomoya0318
 2. dotfiles repo を `~/.local/share/chezmoi` に clone
 3. `.chezmoi.toml.tmpl` — ntfy topic (スマホ通知用) を対話入力 (不要なら空 Enter)
 4. `.chezmoiscripts/run_once_before_10_install-brew.sh` — Homebrew 未導入なら install
-5. chezmoi apply で dotfiles を deploy (`.zshrc`/`.zshenv`、git/nvim/ghostty/starship/zed/mise 設定、`~/.claude/` 等)
-6. `.chezmoiscripts/run_onchange_after_40_brew-bundle.sh` — `brew bundle` で CLI ツール (git, neovim, mise, ripgrep, …) と Cask (cmux, obsidian, orbstack, karabiner, mactex 等) を install
+5. chezmoi apply で dotfiles を deploy (`.zshrc`/`.zshenv`、git/ghostty/starship/mise 設定、`~/.claude/` 等)
+6. `.chezmoiscripts/run_onchange_after_40_brew-bundle.sh` — `brew bundle` で CLI ツール (git, mise, ripgrep, …) と Cask (cmux, obsidian, orbstack, karabiner, mactex 等) を install
 
 > `run_once_before_20_install-nix` と `run_onchange_after_30_apply-home-manager`
 > は Linux 専用 (テンプレートで darwin 時は no-op)。Mac では何もしない。
@@ -202,7 +202,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tomoya0318
 1. chezmoi バイナリ取得
 2. dotfiles repo を `~/.local/share/chezmoi` に clone
 3. `.chezmoiscripts/run_once_before_20_install-nix.sh` — nix が利用可能か検証 (install 自体は手順 2 で完了済み)
-4. chezmoi apply で `~/.config/nvim`, `~/.claude` 等の dotfiles を deploy
+4. chezmoi apply で `~/.claude` 等の dotfiles を deploy
 5. `.chezmoiscripts/run_onchange_after_30_apply-home-manager.sh` — `home-manager switch --flake .#research` で zsh/starship/git/各種 CLI を Nix 管理下に
 
 `.zshrc` / `.zshenv` / `.config/git/` は `.chezmoiignore` の Linux 向け除外で展開されない

@@ -34,7 +34,7 @@ cat <<EOF
 
 残るもの (必要に応じて手動で削除):
   - ~/.terminfo (Ghostty 用 terminfo)
-  - ~/.config/nvim ~/.claude (chezmoi apply で展開)
+  - ~/.claude (chezmoi apply で展開)
   - dotfiles repo (~/dotfiles 等)
   - 旧 single-user 移行時のバックアップ (~/.zshrc.old-nix 等、存在する場合)
 
@@ -151,7 +151,7 @@ login shell が ~/.nix-profile/bin/zsh だった場合は dangling になって�
 
 その他、残ったファイルで不要なものは手動で削除:
   rm ~/.zshrc.old-nix ~/.zshenv.old-nix ~/.nix-profile.old ~/.nix-channels.old ~/.nix-defexpr.old 2>/dev/null
-  rm -rf ~/.config/nvim ~/.claude
+  rm -rf ~/.claude
   rm -rf ~/dotfiles
 
 EOF

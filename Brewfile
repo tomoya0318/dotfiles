@@ -6,7 +6,6 @@
 # --- CLI ツール ---
 brew "git"
 brew "chezmoi"
-brew "neovim"
 brew "fzf"
 brew "gum"
 brew "ripgrep"
@@ -14,10 +13,8 @@ brew "fd"
 brew "jq"
 brew "tree"
 brew "gh"
-brew "lazygit"
 brew "lefthook"
 brew "mise"
-brew "direnv"
 brew "starship"
 brew "awscli"
 brew "cmake"
@@ -25,17 +22,12 @@ brew "coreutils"
 brew "ffmpeg"
 brew "uv"
 brew "wireguard-tools"
-brew "defuddle"
 brew "poppler"
-brew "herdr" # agent multiplexer (AI agent 対応の tmux 代替、ghostty と併用)
+brew "herdr"
 
 # --- zsh プラグイン ---
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
-
-# --- IME 切替 (nvim の im-select.nvim が使用) ---
-tap "daipeihust/tap"
-brew "daipeihust/tap/im-select"
 
 # --- Cask: ターミナル ---
 cask "ghostty"

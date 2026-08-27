@@ -1,0 +1,94 @@
+{
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "git.confirmSync": false,
+    "workbench.iconTheme": "material-icon-theme",
+    "git.enableSmartCommit": true,
+    "editor.unicodeHighlight.allowedLocales": {
+        "zh-hans": true,
+        "zh-hant": true
+    },
+    "editor.unicodeHighlight.includeStrings": false,
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.detectIndentation": false
+    },
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "workbench.startupEditor": "none",
+    "python.analysis.typeCheckingMode": "standard",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "workbench.settings.applyToAllProfiles": [
+        "files.autoSave"
+    ],
+    "files.autoSave": "afterDelay",
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.detectIndentation": false
+    },
+    "typescript.updateImportsOnFileMove.enabled": "never",
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "json": true
+    },
+    "github.copilot.nextEditSuggestions.enabled": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "redhat.telemetry.enabled": true,
+    "docker.extension.enableComposeLanguageServer": false,
+    "diffEditor.codeLens": true,
+    "terminal.external.osxExec": "Ghostty.app",
+    "chat.instructionsFilesLocations": {
+        ".github/instructions": true,
+        ".claude/rules": true
+    },
+    "javascript.updateImportsOnFileMove.enabled": "never",
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.jj": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true
+    },
+    "[dockercompose]": {
+        "editor.insertSpaces": true,
+        "editor.autoIndent": "advanced",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        },
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "[github-actions-workflow]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "claudeCode.preferredLocation": "panel",
+    "workbench.editorAssociations": {
+        "*.copilotmd": "vscode.markdown.preview.editor",
+        "*.pkl": "default"
+    },
+    "claudeCode.selectedModel": "sonnet",
+    "editor.unicodeHighlight.allowedCharacters": {
+        "．": true
+    },
+    "json.schemaDownload.trustedDomains": {
+        "https://schemastore.azurewebsites.net/": true,
+        "https://raw.githubusercontent.com/": true,
+        "https://www.schemastore.org/": true,
+        "https://json.schemastore.org/": true,
+        "https://json-schema.org/": true,
+        "https://biomejs.dev": true
+    },
+    "chat.viewSessions.orientation": "stacked",
+    "workbench.colorTheme": "Tokyo Night Storm",
+    "editor.tabSize": 2,
+    "[python]": {
+        "editor.tabSize": 4
+    },
+    "editor.fontSize": 14,
+    "terminal.integrated.fontSize": 13,
+    "markdown.preview.fontSize": 16
+}

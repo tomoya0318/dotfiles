@@ -34,7 +34,6 @@
 
 ## ◇ Git / worktree
 
-- `Ctrl-a g g` — LazyGitを開く
 - `Ctrl-a g n` — worktreeを作成
 - `Ctrl-a g o` — 既存worktreeを選んで開く
 - `Ctrl-a g d` — 現在のmanaged worktreeを削除（確認あり）

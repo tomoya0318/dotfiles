@@ -7,8 +7,6 @@ fi
 export PATH="$HOME/.local/bin:$HOME/Library/pnpm:$PATH"
 
 # --- 環境変数 ---
-export EDITOR="zed --wait"
-export VISUAL="zed --wait"
 export PNPM_HOME="$HOME/Library/pnpm"
 
 # --- 履歴 ---
@@ -48,9 +46,6 @@ if command -v fzf >/dev/null 2>&1; then
 fi
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
-fi
-if command -v direnv >/dev/null 2>&1; then
-  eval "$(direnv hook zsh)"
 fi
 
 # --- OrbStack ---

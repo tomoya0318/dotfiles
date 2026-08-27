@@ -1,11 +1,7 @@
 # 日本語 LaTeX ビルド設定（upLaTeX → dvipdfmx）
 # ~/dev/research/ai-research-workspace/.vscode/settings.json の LaTeX Workshop
-# recipe を移植したもの。これを単一ソースとして
-#   - texlab（Zed）
-#   - vimtex（Neovim）
-#   - 素の `latexmk`（CLI）
-# が同一ビルドを共有する。
-# ※ VSCode 側は latexmk を -norc 付きで呼ぶためこの rc を読まず、従来どおり
+# recipe を移植したもの。CLI で素の `latexmk` を叩いたときに同じビルドになるよう揃えてある。
+# ※ VSCode 側は latexmk を -norc 付きで呼ぶためこの rc を読まず、
 #    settings.json のインライン recipe で独立して動く（無影響）。
 # ※ uplatex 前提なので、将来 pdflatex 等の別系統を使うプロジェクトでは
 #    そのディレクトリに ./.latexmkrc を置けば上書きできる。

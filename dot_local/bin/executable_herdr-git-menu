@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 # Herdrのprefix modeはprefix後の1キーまでを扱う。
-# この一時ペインで2キー目を読み、Neovimのleader group風に振り分ける。
+# この一時ペインで2キー目を読み、leader group 風に振り分ける。
 
 source_cwd=${HERDR_ACTIVE_PANE_CWD:-$PWD}
 workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-}
@@ -70,20 +70,18 @@ draw_menu() {
 
   title=$'\e[1;38;2;137;180;250m◆  Git & Worktree\e[0m'
   repo=$'\e[38;2;166;173;200m'${repo_line}$'\e[0m'
-  key_g=$'\e[1;38;2;166;227;161mg\e[0m'
   key_n=$'\e[1;38;2;137;180;250mn\e[0m'
   key_o=$'\e[1;38;2;116;199;236mo\e[0m'
   key_d=$'\e[1;38;2;243;139;168md\e[0m'
 
-  content=$(printf '%s\n   %s\n\n   %s   %-20s %s\n   %s   %-20s %s\n   %s   %-20s %s\n   %s   %-20s %s\n\n       %-20s %s' \
+  content=$(printf '%s\n   %s\n\n   %s   %-20s %s\n   %s   %-20s %s\n   %s   %-20s %s\n\n       %-20s %s' \
     "$title" "$repo" \
-    "$key_g" 'LazyGit' 'repository dashboard' \
     "$key_n" 'New worktree' 'create from this Space' \
     "$key_o" 'Open worktree' 'browse existing checkouts' \
     "$key_d" 'Delete worktree' 'remove current managed Space' \
     'q / esc' 'close menu')
 
-  top_margin=$(( (lines - 13) / 2 ))
+  top_margin=$(( (lines - 11) / 2 ))
   left_margin=$(( (columns - 66) / 2 ))
   (( top_margin < 0 )) && top_margin=0
   (( left_margin < 0 )) && left_margin=0
@@ -193,7 +191,6 @@ draw_menu
 read -rsk 1 choice
 
 case $choice in
-  g) exec lazygit --use-config-file "$HOME/.config/lazygit/config.yml" ;;
   n) clear; create_worktree ;;
   o) clear; open_worktree ;;
   d) clear; remove_worktree ;;

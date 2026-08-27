@@ -1,7 +1,7 @@
 # --- Appearance & Theme ---
-# Zed と揃えた Tokyo Night (Night バリアント, 背景 #1a1b26)
+# Tokyo Night (Night バリアント, 背景 #1a1b26)
 theme = TokyoNight
-# Zed 同様に文字は白寄りに上書き (デフォルト #c0caf5 は少し暗いため)
+# 文字は白寄りに上書き (デフォルト #c0caf5 は少し暗いため)
 foreground = #ffffff
 
 background-opacity = 1.0
@@ -57,14 +57,14 @@ cursor-style-blink = false
 cursor-invert-fg-bg = true
 cursor-opacity = 0.8
 
-# --- tmux/nvim 互換（文字幅）---
-# Ghostty 既定の unicode 幅計算は tmux / nvim(wcwidth系) と食い違い、
+# --- TUI 互換（文字幅）---
+# Ghostty 既定の unicode 幅計算は herdr など wcwidth 系の TUI と食い違い、
 # Nerd Font アイコンや CJK・絵文字でカーソル位置がズレて「残像/行重複」が出る。
-# legacy(wcwidth) に合わせて三者の幅を一致させる（markview の罫線・アイコンで顕著だった症状の対処）。
+# legacy(wcwidth) に合わせて幅を一致させる。
 grapheme-width-method = legacy
 
 # --- Input & Mouse ---
-# NeovimでのOptionキー操作を有効化（必須級）
+# ターミナル側で Option を Alt として渡す（TUI のキーバインド用）
 macos-option-as-alt = true
 mouse-scroll-multiplier = 2
 mouse-hide-while-typing = true

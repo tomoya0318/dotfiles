@@ -27,6 +27,7 @@ tmp/
 # Mac (darwin) 以外では、Mac特有の設定ファイルを展開しない
 {{ if ne .chezmoi.os "darwin" }}
 .config/karabiner/
+Library/
 raycast_scripts/
 .zshrc
 .zshenv
@@ -39,10 +40,3 @@ raycast_scripts/
 # --- Python bytecode ---
 **/__pycache__/
 **/*.pyc
-
-# Neovim フォルダ内の不要なものを展開・管理対象から除外
-.config/nvim/data/
-.config/nvim/doc/tags
-.config/nvim/*.log
-.config/nvim/debug
-.config/nvim/spell/*.spl
