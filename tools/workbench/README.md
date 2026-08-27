@@ -2,8 +2,9 @@
 
 複数のリポジトリと作業ディレクトリを一覧し、大きな差分を「1つの決定とその波及」で読めるローカル作業コンソール。
 
-skill 側の手順は `skills/workbench/SKILL.md`（このリポジトリが正本）。
-`~/.claude/skills/workbench/SKILL.md` と `~/dev/workbench` は chezmoi が張る symlink なので、編集するときはリポジトリ側を直す。
+差分レビューは VSCode で読む運用へ移したため、この作業コンソールを駆動する skill は削除した。
+アプリと `tools/gen.py` は残してあり、手動で起動すれば使える。
+`~/dev/workbench` は chezmoi が張る symlink なので、編集するときはリポジトリ側を直す。
 
 ## 起動
 
@@ -38,7 +39,7 @@ python3 tools/gen.py <repo> <ref> -o <work>/review/report.json
 # 未コミットの変更を見るなら --uncommitted を付ける（未追跡ファイルも含む。index は触らない）
 python3 tools/gen.py <repo> HEAD --uncommitted -o <work>/review/report.json
 
-# 2. AI にグルーピングと理由文を書かせて groups.json を得る（skill の手順3）
+# 2. AI にグルーピングと理由文を書かせて groups.json を得る
 
 # 3. groups と findings と thread を畳み込む
 python3 tools/gen.py <repo> <ref> \
