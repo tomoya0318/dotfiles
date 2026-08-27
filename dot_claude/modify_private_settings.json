@@ -38,8 +38,6 @@
     ],
     "deny": [
       "Bash(sudo *)",
-      "Bash(git reset *)",
-      "Bash(git rebase *)",
       "Read(**/id_rsa*)",
       "Read(**/id_ed25519*)",
       "Read(**/*.pem)",
@@ -48,7 +46,6 @@
       "Read(**/*-key)",
       "Read(**/*apikey*)",
       "Read(**/*token*)",
-      "Bash(rm -rf *)",
       "Bash(rm -rf /)",
       "Bash(rm -rf ~)",
       "Bash(rm -rf ~/*)",
@@ -74,6 +71,8 @@
     ],
     "ask": [
       "Bash(rm *)",
+      "Bash(git reset --hard *)",
+      "Bash(git rebase *)",
       "Bash(chmod *)",
       "Bash(wget *)",
       "Bash(curl *)",
