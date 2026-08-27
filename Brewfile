@@ -32,6 +32,9 @@ brew "zsh-syntax-highlighting"
 # --- Cask: ターミナル ---
 cask "ghostty"
 
+# --- Cask: エディタ ---
+cask "visual-studio-code"
+
 # --- Cask: ノート/ドキュメント ---
 cask "obsidian"
 
