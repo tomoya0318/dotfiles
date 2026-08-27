@@ -27,17 +27,6 @@ WORK_DIR="$BASE_DIR/${NEXT_NUM}_${SAFE_NAME}"; mkdir "$WORK_DIR"; TODAY=$(date +
 ## リスク
 EOF
 } > "$WORK_DIR/plan.md"
-{
-  printf '# 検証記録: %s\n\n作成日: %s\n' "$WORK_NAME" "$TODAY"
-  cat <<'EOF'
-
-## 計画検証
-<!-- 指摘表: # | 指摘 | 確信度 | 対応（計画へ反映 / スキップ＋理由） -->
-
-## 実装検証
-<!-- 指摘表: # | 分類（欠陥 / 要件外） | 指摘 | 確信度 | 対応 -->
-EOF
-} > "$WORK_DIR/review.md"
 printf '{"work_dir":"%s","plan_file":"%s/plan.md","review_file":"%s/review.md","sequence_number":"%s","work_name":"%s"}\n' "$WORK_DIR" "$WORK_DIR" "$WORK_DIR" "$NEXT_NUM" "$SAFE_NAME"
 
 register_workbench_root() {

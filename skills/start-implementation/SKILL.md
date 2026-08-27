@@ -1,13 +1,14 @@
 ---
 name: start-implementation
-description: Starts an implementation with an investigation, a user-approved plan, and adversarial plan and implementation reviews.
+description: Starts an implementation with an investigation and a user-approved plan. Adversarial plan and implementation reviews run only when the user asks for them.
 disable-model-invocation: true
 argument-hint: /start-implementation <description>
 ---
 
 # 実装を開始する
 
-`tmp/NNNN_<name>/` に `plan.md` と `review.md` を作り、調査、計画検証、承認、実装、実装検証を分離して進める。
+`tmp/NNNN_<name>/` に `plan.md` を作り、調査、承認、実装を分離して進める。
+計画検証と実装検証は既定では行わない。
 
 ## 前提
 
@@ -60,11 +61,38 @@ AI が単独で決めてよいことは `要件` に書かない。
 
 ## 規模の判定
 
-対象が2ファイル以内で、調査が数回の grep で済むなら、手順2・4・7 の委譲を飛ばす。
-main が自分で調べて `plan.md` を書いて実装し、手順8 の実装検証だけ残す。
+対象が2ファイル以内で、調査が数回の grep で済むなら、手順2・7 の委譲を飛ばす。
+main が自分で調べて `plan.md` を書いて実装する。
 
 サブエージェントは、広い範囲にまたがる調査と、範囲が重ならない単位へ分けられる実装にだけ使う。
 main が数回の操作で終わる作業を委譲しない。台数分のコストと時間がそのまま乗る。
+
+## 検証の実行
+
+計画検証と実装検証は、ユーザーが明示的に求めたときだけ行う。
+求められていなければ飛ばし、実行するかどうかを訊かない。提案もしない。
+
+`review.md` は作業ディレクトリを作る時点では作らない。
+`init-work-dir.sh` が返す `review_file` は書き込み先のパスであって、存在は保証しない。
+ファイルは検証を走らせた codex が作り、自分で表を書く。main は転記しない。
+
+検証も codex を `workspace-write` で走らせる。`review.md` を書かせるためである。
+プロンプトで編集先を `review.md` だけに限り、run の後に main が `git status` を見て、
+`review.md` 以外が変わっていないことを確かめる。プロンプトの禁止だけに委ねない。
+
+モデルは `gpt-5.6-luna` を明示する。`~/.codex/config.toml` の既定に任せると、
+設定を変えたときに検証の強度が黙って変わる。
+
+effort は実装検証だけ差分量で変える。計画検証は `xhigh` にする。
+
+| `git diff --shortstat` | effort |
+|---|---|
+| 3ファイル以内かつ200行未満 | `high` |
+| 200〜600行 | `xhigh` |
+| 600行超 | `xhigh`。加えて要件単位で run を分ける |
+
+600行を超えるときに effort をこれ以上上げても、1つの run では後半が雑になる。
+run を分け、各 run に担当する `要件` を明示する。`review.md` へは追記させる。
 
 ## 手順
 
@@ -76,19 +104,47 @@ main が数回の操作で終わる作業を委譲しない。台数分のコス
    `plan.md` の節や段取りは書かせない。plan を書くのは常に main である。
 3. main が調査結果から `plan.md` を書く。
    `要件` が独立して撤回できる単位に分かれていなければ、ここで作業を分ける。
-4. [plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから、実装者とは別の fresh な codex に渡し、指摘だけを `review.md` の「計画検証」へ記録する。
-5. 指摘を計画へ反映し、反映内容を同節へ追記する。
+4. ユーザーが計画検証を求めた場合のみ、[plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換し、`<work>/plan-review-prompt.md` へ書き出して fresh な codex に渡す。
+
+   ```
+   codex exec -m gpt-5.6-luna --sandbox workspace-write \
+     -c model_reasoning_effort=xhigh \
+     -C <repo-root> < <work>/plan-review-prompt.md
+   ```
+5. 手順4を行った場合は、指摘を計画へ反映し、`review.md` の「計画検証」の表の `対応` 列を埋める。
    `要件` が増えたなら、分割をもう一度判定する。
 6. `plan.md` のパスをユーザーへ伝え、`要件` と `方針` の見出しを列挙して承認を求める。
    承認を得るまでコードを変更しない。
 7. 承認後に実装する。
-   規模が大きく、範囲が重ならない単位へ分けられるなら、codex plugin の codex-rescue subagent へ委譲する。分けた単位は並行させてよい。
-   codex plugin が利用できない環境では fresh な subagent に委譲する。それ以外は main が自分で実装する。
-   委譲するときは、調査で分かった現状の作りを委譲プロンプトへ書く。`plan.md` には書かない。
+   規模が大きく、範囲が重ならない単位へ分けられるなら codex へ委譲する。分けた単位は並行させてよい。
+   委譲プロンプトは [impl-delegation-prompt.md](references/impl-delegation-prompt.md) を骨組みにし、調査で分かった現状の作りをそこへ書く。`plan.md` には書かない。
+   書き出した `<work>/impl-prompt.md` を渡す。
+
+   ```
+   codex exec -m gpt-5.6-luna --sandbox workspace-write \
+     --add-dir "$HOME/.codex" \
+     -c model_reasoning_effort=<effort> \
+     -c sandbox_workspace_write.network_access=true \
+     -C <repo-root> -o <work>/impl-result.md < <work>/impl-prompt.md
+   ```
+
+   `--add-dir` と `network_access` は、実装者が上位モデルへ相談するために要る。
+   両方無いと子の codex は app-server を初期化できず、相談が失敗する。
+
+   effort は `high` を既定にする。方針が確定していて機械的な作業なら `medium`、要件どうしが絡むなら `xhigh` にする。
+
+   codex CLI が無い環境では fresh な subagent に委譲する。
    実装中に新しい判断が要ると分かったら、そこで止めてユーザーに訊く。
    `要件` と `方針` から外れるときは訊く。それ以外の細部は実装が決めてよい。
    設定の DoD コマンドを変更範囲に応じて main が実行する。
-8. [impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換してから、実装者とは別の fresh な codex に渡し、修正させず指摘だけを「実装検証」へ追記する。
+8. ユーザーが実装検証を求めた場合のみ、[impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダーを置換し、`<work>/impl-review-prompt.md` へ書き出して実装者とは別の fresh な codex に渡す。
+
+   ```
+   codex exec -m gpt-5.6-luna --sandbox workspace-write \
+     -c model_reasoning_effort=<effort> \
+     -C <repo-root> < <work>/impl-review-prompt.md
+   ```
+
    指摘をどう直すかはユーザーが判断し、承認された指摘だけを実装側へ修正させる。
 
 ## コミット
@@ -109,7 +165,7 @@ ADR ディレクトリは最初の ADR を書くときに作る。
 
 ## バイアス分離
 
-検証は実装したインスタンスと別の fresh な codex に依頼する。
+検証を行うときは、実装したインスタンスと別の fresh な codex に依頼する。
 検証者には指摘だけをさせ、手を動かさせない。
 検証者は、コミットメッセージ、計画、実装側の主張を信用せず、コード、差分、実行結果の現物で確認する。
 
