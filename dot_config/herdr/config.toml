@@ -71,6 +71,10 @@ accent = "#89b4fa"
 agent_panel_sort = "spaces"
 show_agent_labels_on_pane_borders = false
 
+# renamer が生成した作業概要をAgentの3行目に表示
+[ui.sidebar.agents]
+rows = [["state_icon", "workspace", "tab"], ["agent"], ["$task"]]
+
 # 背景ワークスペースの agent 状態変化を macOS 通知センターへ出す
 # （アクティブタブは herdr の仕様で抑制される。フォーカス中の通知は hook 側で対応予定）
 [ui.toast]
