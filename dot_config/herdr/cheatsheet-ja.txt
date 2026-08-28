@@ -1,59 +1,72 @@
 # Herdr Keymap
 
-> Prefix: **Ctrl-a**
+> Prefix: **Ctrl-q** · 日常操作は cmd 系（下記）に移行済み
 > 閉じる: **q / Esc** · 移動: **j / k / ↑ / ↓** · 検索: **/**
+
+## ◇ cmd キー（Ghostty から中継）
+
+- `cmd-]` / `cmd-[` — 次・前のagentへ（Spaceをまたぐ）
+- `cmd-o` — 通知のあったペインへ
+- `cmd-g` — navigateモード（↑↓でSpace、hjklでペイン、Escで終了）
+- `cmd-d` / `cmd-shift-d` — 右・下に分割
+- `cmd-w` — ペインを閉じる
+- `cmd-t` — 新規タブ
+- `cmd-option-←↓↑→` — ペイン移動
+- `cmd-1..9` — 番号でタブ移動
+
+Ghostty側の分割・タブ機能は herdr に振り替えてあります。
 
 ## ◇ ペイン（分割画面）
 
-- `Ctrl-a v` — 右に分割
-- `Ctrl-a -` — 下に分割
-- `Ctrl-a h/j/k/l` — 左・下・上・右へ移動
-- `Ctrl-a r` — リサイズモード（`h/j/k/l`で調整、`Esc`で終了）
-- `Ctrl-a z` — ズーム
-- `Ctrl-a Tab` / `Ctrl-a Shift-Tab` — 次・前のペイン
-- `Ctrl-a x` — ペインを閉じる
-- `Ctrl-a Shift-p` — ペインに名前を付ける
+- `Ctrl-q |` — 右に分割
+- `Ctrl-q -` — 下に分割
+- `Ctrl-q h/j/k/l` — 左・下・上・右へ移動
+- `Ctrl-q r` — リサイズモード（`h/j/k/l`で調整、`Esc`で終了）
+- `Ctrl-q z` — ズーム
+- `Ctrl-q Tab` / `Ctrl-q Shift-Tab` — 次・前のペイン
+- `Ctrl-q x` — ペインを閉じる
+- `Ctrl-q Shift-p` — ペインに名前を付ける
 
 ## ◇ タブ（tmuxのウィンドウ相当）
 
-- `Ctrl-a c` — 新規タブ
-- `Ctrl-a 1..9` — 番号で移動
-- `Ctrl-a n` / `Ctrl-a p` — 次・前のタブ
-- `Ctrl-a Shift-t` — 名前を変更
-- `Ctrl-a Shift-x` — 閉じる
+- `Ctrl-q c` — 新規タブ
+- `Ctrl-q 1..9` — 番号で移動
+- `Ctrl-q n` / `Ctrl-q p` — 次・前のタブ
+- `Ctrl-q Shift-t` — 名前を変更
+- `Ctrl-q Shift-x` — 閉じる
 
 ## ◇ Space（プロジェクト相当）
 
-- `Ctrl-a w` — ピッカーで一覧・切替
-- `Ctrl-a Shift-n` — 新規作成
-- `Ctrl-a Shift-w` — 名前を変更
-- `Ctrl-a Shift-d` — 閉じる（確認あり）
-- `Ctrl-a q` — detach（セッションは維持）
+- `Ctrl-q w` — ピッカーで一覧・切替
+- `Ctrl-q Shift-n` — 新規作成
+- `Ctrl-q Shift-w` — 名前を変更
+- `Ctrl-q Shift-d` — 閉じる（確認あり）
+- `Ctrl-q q` — detach（セッションは維持）
 
 復帰はシェルで`herdr`、完全停止は`herdr server stop`。
 
 ## ◇ Git / worktree
 
-- `Ctrl-a g n` — worktreeを作成
-- `Ctrl-a g o` — 既存worktreeを選んで開く
-- `Ctrl-a g d` — 現在のmanaged worktreeを削除（確認あり）
-- `Ctrl-a g q` / `Ctrl-a g Esc` — キャンセル
+- `Ctrl-q g n` — worktreeを作成
+- `Ctrl-q g o` — 既存worktreeを選んで開く
+- `Ctrl-q g d` — 現在のmanaged worktreeを削除（確認あり）
+- `Ctrl-q g q` / `Ctrl-q g Esc` — キャンセル
 
 ## ◇ スクロールバック / コピー
 
 - マウスホイール — スクロールバックを表示
 - ドラッグ選択 — コピー
-- `Ctrl-a e` — スクロールバックをエディタで開く
+- `Ctrl-q e` — スクロールバックをエディタで開く
 
 ## ◇ その他
 
-- `Ctrl-a ?` — このチートシート
+- `Ctrl-q ?` — このチートシート
 - `F1` — 全キーバインド一覧
-- `Ctrl-a s` — 設定画面
-- `Ctrl-a Shift-r` — 設定リロード
-- `Ctrl-a b` — サイドバー表示切替
-- `Ctrl-a o` — 通知のあったペインへ移動
-- `Ctrl-a Ctrl-a` — アプリへ本来の`Ctrl-a`を送る
+- `Ctrl-q s` — 設定画面
+- `Ctrl-q Shift-r` — 設定リロード
+- `Ctrl-q b` — サイドバー表示切替
+- `Ctrl-q o` — 通知のあったペインへ移動
+- `Ctrl-q Ctrl-q` — アプリへ本来の`Ctrl-q`を送る
 
 サイドバーにはagentの`working / blocked / done / idle`状態が表示されます。
 

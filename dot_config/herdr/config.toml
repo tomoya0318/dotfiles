@@ -8,29 +8,44 @@ onboarding = false
 new_cwd = "follow"
 
 [keys]
-# tmux 時代の prefix (Ctrl-a) を踏襲
-prefix = "ctrl+a"
+# prefix は日常操作から外れたので、奪われて困らないキーにする。
+# ctrl+a はシェル・Claude Code・codex の行頭移動として使うため返した。
+prefix = "ctrl+q"
 
 # ビルトインのキーバインド一覧は F1 へ退避（prefix+? は日本語チートシートに使う）
 help = "f1"
 
-# Space 移動は prefix+w に集約し、prefix+g は Git/worktree メニューに使う
-goto = ""
+# navigate モードは cmd+g から直接開く。Space の移動はここに集約し、
+# workspace_picker には cmd を割り当てない（prefix+w は残る）。
+goto = "alt+g"
 
 # worktree 操作は Git/worktree メニューに集約する
 new_worktree = ""
 
 # ペイン分割は tmux 慣習に合わせる（左右分割は | / デフォルトの prefix+v は無効化）
-split_vertical = "prefix+|"
+split_vertical = ["prefix+|", "alt+d"]
+split_horizontal = ["prefix+minus", "alt+shift+d"]
 
 # vim 風 + 矢印キーでのペイン移動（hjkl はそのまま残す）
-focus_pane_left = ["prefix+h", "prefix+left"]
-focus_pane_down = ["prefix+j", "prefix+down"]
-focus_pane_up = ["prefix+k", "prefix+up"]
-focus_pane_right = ["prefix+l", "prefix+right"]
+focus_pane_left = ["prefix+h", "prefix+left", "alt+h"]
+focus_pane_down = ["prefix+j", "prefix+down", "alt+j"]
+focus_pane_up = ["prefix+k", "prefix+up", "alt+k"]
+focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 
-# send-prefix はビルトイン: prefix を2回押す（Ctrl-a Ctrl-a）と literal な
-# Ctrl-a が中のアプリへ送られる（シェルの行頭移動）。設定不要。
+# --- cmd 系の direct binding ---
+# Ghostty が cmd+X を ESC+文字 に変換して送ってくる（dot_config/ghostty/config を参照）。
+# alt+文字 は物理キーでもあるため、割り当てた文字は内側のアプリから失われる。
+# 奪うもの: d(kill-word) t(transpose-words) g(get-line) h(run-help) l(down-case-word)
+#           n/p(history-search) w(copy-region-as-kill)。fzf の alt+c は避けている。
+next_agent = "alt+n"
+previous_agent = "alt+p"
+open_notification_target = ["prefix+o", "alt+o"]
+close_pane = ["prefix+x", "alt+w"]
+new_tab = ["prefix+c", "alt+t"]
+switch_tab = ["prefix+1..9", "alt+1..9"]
+
+# send-prefix はビルトイン: prefix を2回押す（Ctrl-q Ctrl-q）と literal な
+# Ctrl-q が中のアプリへ送られる。設定不要。
 
 # --- 日本語チートシート（Gum pager、一時ペインで表示） ---
 [[keys.command]]
