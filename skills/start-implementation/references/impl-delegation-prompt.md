@@ -1,5 +1,5 @@
 実装を委譲するときのプロンプトの骨組み。
-`<...>` を具体値で埋め、`<work-dir>/impl-prompt.md` へ書き出して渡す。
+`<...>` を具体値で埋め、`<work-dir>/impl-prompt-<name>.md` へ書き出して渡す。
 
 ---
 
@@ -13,7 +13,8 @@
 <担当する要件の見出し。分割していなければ全部>
 
 `実装手順` は実現性の下見であって指示ではありません。より良い順序があればそちらで構いません。
-`要件` と `方針` から外れる判断が要ると分かったら、実装を止めて報告してください。
+`要件` と `方針` から外れる判断が要ると分かったら、実装を止めてください。
+その場合は、`<result-file>` の1行目に `NEEDS_USER_DECISION: <論点を1行で>` と書き、そこで応答を終えてください。
 
 ## 現状の作り
 
@@ -30,9 +31,17 @@
 
 設計判断で確信が持てないときは、自分で決め切らずに上位モデルへ相談してください。
 
+相談用プロンプトを `<work-dir>/consult-<n>-prompt.md` に書き、次のコマンドで起動してください。
+
+`<論点名>` は英数字、ハイフン、アンダースコアだけの短い名前にしてください。
+
 ```
-codex exec -m gpt-5.6-sol --sandbox read-only --skip-git-repo-check \
-  -c model_reasoning_effort=xhigh "<相談内容>" < /dev/null
+bash /Users/tomoya-n/.local/share/chezmoi/skills/start-implementation/scripts/spawn-codex-tab.sh \
+  --name consult-<論点名> --role consult \
+  --model gpt-5.6-sol --sandbox read-only --effort xhigh \
+  --cwd <repo-root> \
+  --prompt-file <work>/consult-<n>-prompt.md \
+  --result-file <work>/consult-<n>-result.md
 ```
 
 相談するのは次のときです。
@@ -48,7 +57,12 @@ codex exec -m gpt-5.6-sol --sandbox read-only --skip-git-repo-check \
 - 数分読めば現物から確かめられること
 
 1回の相談で1つの論点だけを尋ね、現物のコードを引用してください。
-相談相手は read-only で走るのでファイルは変更しません。返答を採るかどうかはあなたが決めます。
+相談用プロンプトには、回答を `<work>/consult-<n>-result.md` に書くよう指示してください。
+相談相手がユーザーの判断を要すると分かった場合は、同ファイルの1行目に `NEEDS_USER_DECISION: <論点を1行で>` と書き、そこで応答を終えるよう指示してください。
+相談相手は primary workspace を read-only で走るので、リポジトリ内のファイルは変更しません。
+結果を親へ返すため、指定された相談結果ファイルだけに回答を書きます。
+`completed` が返ったら結果ファイルを読み、返答を採るかどうかはあなたが決めます。
+相談相手が `needs-user` を返したら、相談結果の `NEEDS_USER_DECISION:` 行を自分の `<result-file>` の1行目へそのまま書き、実装を続けず応答を終えてください。
 相談したら、論点と結論を最終報告に1行ずつ残してください。
 
 ## 検証
@@ -59,7 +73,9 @@ codex exec -m gpt-5.6-sol --sandbox read-only --skip-git-repo-check \
 
 ## 報告
 
-最後に次を返してください。
+最後に、次の4項目を `<result-file>` に書いてください。
+ユーザーの判断を求めて `NEEDS_USER_DECISION:` で停止する場合を除き、
+該当しない項目も「なし」と書き、4項目すべてを `<result-file>` に書いてください。
 
 - 変更したファイルと、それぞれ何をしたか
 - 上位モデルに相談した論点と結論

@@ -77,11 +77,15 @@ main が数回の操作で終わる作業を委譲しない。台数分のコス
 ファイルは検証を走らせた codex が作り、自分で表を書く。main は転記しない。
 
 検証も codex を `workspace-write` で走らせる。`review.md` を書かせるためである。
-プロンプトで編集先を `review.md` だけに限り、run の後に main が `git status` を見て、
-`review.md` 以外が変わっていないことを確かめる。プロンプトの禁止だけに委ねない。
+プロンプトで編集先を `review.md` と `--result-file` に限り、run の後に main が `git status` を見て、
+それ以外が変わっていないことを確かめる。プロンプトの禁止だけに委ねない。
 
-モデルは `gpt-5.6-luna` を明示する。`~/.codex/config.toml` の既定に任せると、
-設定を変えたときに検証の強度が黙って変わる。
+指摘の正本は `review.md` である。`--result-file` は決着判定に使う別のファイルで、
+`review.md` へ何をどれだけ書いたかを短く報告させる。
+`review.md` を `--result-file` に指定しない。追記する run で先頭から消える。
+
+モデルと effort は `spawn-codex-tab.sh` の既定と引数で決める。`~/.codex/config.toml` の既定に任せない。
+任せると、設定を変えたときに検証の強度が黙って変わる。
 
 effort は実装検証だけ差分量で変える。計画検証は `xhigh` にする。
 
@@ -104,47 +108,59 @@ run を分け、各 run に担当する `要件` を明示する。`review.md` �
    `plan.md` の節や段取りは書かせない。plan を書くのは常に main である。
 3. main が調査結果から `plan.md` を書く。
    `要件` が独立して撤回できる単位に分かれていなければ、ここで作業を分ける。
-4. ユーザーが計画検証を求めた場合のみ、[plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダーを作業ディレクトリとリポジトリルートの具体的な値で置換し、`<work>/plan-review-prompt.md` へ書き出して fresh な codex に渡す。
+4. ユーザーが計画検証を求めた場合のみ、[plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダー（`<work-dir>`、`<result-file>`）を具体的な値で置換し、`<work>/plan-review-prompt.md` へ書き出して fresh な codex に渡す。
 
    ```
-   codex exec -m gpt-5.6-luna --sandbox workspace-write \
-     -c model_reasoning_effort=xhigh \
-     -C <repo-root> < <work>/plan-review-prompt.md
+   scripts/spawn-codex-tab.sh --name review-plan --role review \
+     --cwd <repo-root> --effort xhigh \
+     --prompt-file <work>/plan-review-prompt.md \
+     --result-file <work>/plan-review-result.md --no-wait
    ```
+
+   herdr の tab が1枚立ち、そこで codex が動く。
+   起動と待ちと status の扱いは [run-in-tab.md](references/run-in-tab.md) に従う。
 5. 手順4を行った場合は、指摘を計画へ反映し、`review.md` の「計画検証」の表の `対応` 列を埋める。
    `要件` が増えたなら、分割をもう一度判定する。
 6. `plan.md` のパスをユーザーへ伝え、`要件` と `方針` の見出しを列挙して承認を求める。
    承認を得るまでコードを変更しない。
 7. 承認後に実装する。
    規模が大きく、範囲が重ならない単位へ分けられるなら codex へ委譲する。分けた単位は並行させてよい。
-   委譲プロンプトは [impl-delegation-prompt.md](references/impl-delegation-prompt.md) を骨組みにし、調査で分かった現状の作りをそこへ書く。`plan.md` には書かない。
-   書き出した `<work>/impl-prompt.md` を渡す。
+   委譲プロンプトは [impl-delegation-prompt.md](references/impl-delegation-prompt.md) を骨組みにし、調査で分かった現状の作りをそこへ書く。`<work-dir>`、`<repo-root>`、`<result-file>` を具体的な値に置き換える。`plan.md` には書かない。
+   書き出した `<work>/impl-prompt-<name>.md` を渡す。
 
    ```
-   codex exec -m gpt-5.6-luna --sandbox workspace-write \
-     --add-dir "$HOME/.codex" \
-     -c model_reasoning_effort=<effort> \
-     -c sandbox_workspace_write.network_access=true \
-     -C <repo-root> -o <work>/impl-result.md < <work>/impl-prompt.md
+   scripts/spawn-codex-tab.sh --name impl-<name> --role impl \
+     --cwd <repo-root> --effort <effort> \
+     --prompt-file <work>/impl-prompt-<name>.md \
+     --result-file <work>/impl-result-<name>.md --no-wait
    ```
 
-   `--add-dir` と `network_access` は、実装者が上位モデルへ相談するために要る。
-   両方無いと子の codex は app-server を初期化できず、相談が失敗する。
+   herdr の tab が1枚立ち、そこで codex が動く。ユーザーが進行を見られ、その場で介入できる。
+   引数と戻り値と落とし穴は [run-in-tab.md](references/run-in-tab.md) にある。読むのは status で迷ったときでよい。
 
-   effort は `high` を既定にする。方針が確定していて機械的な作業なら `medium`、要件どうしが絡むなら `xhigh` にする。
+   1本でも `--no-wait` で起動し、`scripts/wait-codex-tabs.sh` で待つ。
+   Bash ツールは10分で切れるので、`--timeout 540` を返るまで呼び直す。待ちの間はトークンを消費しない。
+
+   effort は `xhigh` を既定にする。方針が確定していて機械的な作業なら `high` にする。
+
+   `needs-user` が返ったら、`issue` の論点をユーザーへ提示して回答を得る。
+   main が代わりに判断しない。回答は `scripts/resume-codex-tab.sh` で止まっている tab へ届ける。
+   `no-result` と `pane-gone` は tab を開いて原因を読み、ユーザーへ伝える。
 
    codex CLI が無い環境では fresh な subagent に委譲する。
-   実装中に新しい判断が要ると分かったら、そこで止めてユーザーに訊く。
    `要件` と `方針` から外れるときは訊く。それ以外の細部は実装が決めてよい。
    設定の DoD コマンドを変更範囲に応じて main が実行する。
-8. ユーザーが実装検証を求めた場合のみ、[impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダーを置換し、`<work>/impl-review-prompt.md` へ書き出して実装者とは別の fresh な codex に渡す。
+   tab は決着しても閉じない。コミットまで通ってからまとめて閉じる。
+8. ユーザーが実装検証を求めた場合のみ、[impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダー（`<work-dir>`、`<result-file>`）を具体的な値に置換し、`<work>/impl-review-prompt.md` へ書き出して実装者とは別の fresh な codex に渡す。
 
    ```
-   codex exec -m gpt-5.6-luna --sandbox workspace-write \
-     -c model_reasoning_effort=<effort> \
-     -C <repo-root> < <work>/impl-review-prompt.md
+   scripts/spawn-codex-tab.sh --name review-<name> --role review \
+     --cwd <repo-root> --effort <effort> \
+     --prompt-file <work>/impl-review-prompt.md \
+     --result-file <work>/impl-review-result.md --no-wait
    ```
 
+   待ち方と status の扱いは手順7と同じである。
    指摘をどう直すかはユーザーが判断し、承認された指摘だけを実装側へ修正させる。
 
 ## コミット
