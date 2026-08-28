@@ -39,7 +39,8 @@ focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 #           n/p(history-search) w(copy-region-as-kill)。fzf の alt+c は避けている。
 next_agent = "alt+n"
 previous_agent = "alt+p"
-open_notification_target = ["prefix+o", "alt+o"]
+new_workspace = "alt+shift+n"
+open_notification_target = "prefix+o"
 close_pane = ["prefix+x", "alt+w"]
 new_tab = ["prefix+c", "alt+t"]
 switch_tab = ["prefix+1..9", "alt+1..9"]

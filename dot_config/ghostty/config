@@ -12,7 +12,8 @@ background-blur-radius = 0
 working-directory = ~/dev
 # split (cmd+d) は現在の cwd を引き継ぐ
 split-inherit-working-directory = true
-# 新規タブ (cmd+T)・新規ウィンドウ (cmd+N) は working-directory(~/dev) で開く
+# 新規タブ (cmd+T) は working-directory(~/dev) で開く
+# cmd+N は herdr の新規スペース作成へ中継する
 tab-inherit-working-directory = false
 window-inherit-working-directory = false
 
@@ -27,9 +28,9 @@ keybind = super+ctrl+f=toggle_fullscreen
 # cmd+X を ESC+文字 (= alt+文字) に変換して herdr の direct binding へ渡す。
 # 中継に alt+[ / alt+] は使えない。ESC[ は CSI、ESC] は OSC の開始と解釈されるため、
 # agent 移動だけ中継を n/p にしている。
+keybind = super+n=text:\x1bN
 keybind = super+]=text:\x1bn
 keybind = super+[=text:\x1bp
-keybind = super+o=text:\x1bo
 keybind = super+d=text:\x1bd
 keybind = super+shift+d=text:\x1bD
 keybind = super+w=text:\x1bw
@@ -39,6 +40,14 @@ keybind = super+alt+arrow_left=text:\x1bh
 keybind = super+alt+arrow_down=text:\x1bj
 keybind = super+alt+arrow_up=text:\x1bk
 keybind = super+alt+arrow_right=text:\x1bl
+keybind = super+digit_1=text:\x1b1
+keybind = super+digit_2=text:\x1b2
+keybind = super+digit_3=text:\x1b3
+keybind = super+digit_4=text:\x1b4
+keybind = super+digit_5=text:\x1b5
+keybind = super+digit_6=text:\x1b6
+keybind = super+digit_7=text:\x1b7
+keybind = super+digit_8=text:\x1b8
 keybind = super+1=text:\x1b1
 keybind = super+2=text:\x1b2
 keybind = super+3=text:\x1b3
