@@ -18,6 +18,8 @@ brew "mise"
 brew "starship"
 brew "awscli"
 brew "cmake"
+# skills/ の一部スクリプトが bash 4.4+ を要求する。3.2 の macOS 標準版では動かない
+brew "bash"
 brew "coreutils"
 brew "ffmpeg"
 brew "uv"
