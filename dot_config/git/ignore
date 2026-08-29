@@ -22,3 +22,8 @@
 
 # エージェントが環境ごとに書くローカル設定
 **/.claude/settings.local.json
+
+# dig のセッションログ（各プロジェクトの一時成果物）
+**/dig/
+!skills/dig/
+!skills/dig/**
