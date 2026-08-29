@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # herdr の tab を1枚立て、そこで codex を対話モードで起動する。
 # Claude からも codex からも同じ引数で呼べる。階層が何段でも同じ手順が使える。
 set -euo pipefail
