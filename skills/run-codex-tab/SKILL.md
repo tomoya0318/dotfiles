@@ -9,10 +9,24 @@ argument-hint: /run-codex-tab <config.yaml>
 別の Codex に作業を委譲し、ユーザーが進行を見たり途中で介入したりできるようにする。
 実装、実装検証、計画検証、読み取り専用の相談など、親のコンテキストから分離したい作業に使う。
 
+## run ディレクトリ
+
+プロンプト、YAML 設定、結果ファイルは、先に `tmp/NNNN_<name>/` を作って同じディレクトリへ置く。
+この skill の `scripts/init-run-dir.sh` は、リポジトリ直下の `tmp/` を既定の保存先として連番ディレクトリを作り、その絶対パスを1行で返す。
+
+```bash
+RUN_DIR="$(bash <skill-dir>/scripts/init-run-dir.sh <run-name> <repo-root>/tmp)"
+```
+
+`<repo-root>/tmp` を省略した場合は、スクリプトを実行したディレクトリの `tmp/` を使う。
+以降の `config.yaml`、`prompt.md`、`result.md` は `$RUN_DIR` の下に作る。
+実装やレビューで Codex が読むリポジトリは、YAML の `cwd` に `<repo-root>` を指定する。
+`$RUN_DIR` はプロンプトや結果の受け渡し場所であり、Codex のコード作業ルートとは分ける。
+
 ## 起動
 
 この skill のディレクトリを `<skill-dir>` とする。
-プロンプトと結果ファイルを先に用意し、起動条件を YAML に書いて `scripts/spawn-codex-tab.sh --config <config.yaml>` で起動する。
+run ディレクトリを作り、プロンプトと結果ファイルをそこへ用意してから、起動条件を YAML に書いて `scripts/spawn-codex-tab.sh --config <config.yaml>` で起動する。
 結果ファイルの親ディレクトリは事前に作成しておく。
 
 ```bash

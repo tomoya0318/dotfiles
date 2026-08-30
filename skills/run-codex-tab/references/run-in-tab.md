@@ -7,10 +7,26 @@ main のコンテキストには結果ファイルしか入らない。
 呼び出し側は main でも codex でもよい。
 階層が何段でも同じ引数で使える。
 
+## run ディレクトリ
+
+プロンプト、設定、結果ファイルの受け渡し場所は `scripts/init-run-dir.sh` で作る。
+引数に run 名と必要なら base directory を渡すと、`tmp/NNNN_<name>/` を作成し、その絶対パスを1行で返す。
+このディレクトリは Codex の `--cwd` ではなく、run 関連ファイルの置き場所として使う。
+コードを読む・変更するリポジトリのルートは、別途 `spawn-codex-tab.sh` の `--cwd` に指定する。
+
 ## スクリプト
 
-`scripts/` の3本を使う。
+`scripts/` の4本を使う。
 中身を読む必要はなく、通常は引数と戻り値だけで扱える。
+
+### init-run-dir.sh
+
+run 関連ファイルを置く `tmp/NNNN_<name>/` を作成し、作成したディレクトリの絶対パスを標準出力へ返す。
+
+| 引数 | 既定 | 説明 |
+|---|---|---|
+| `<run-name>` | 必須 | ディレクトリ名に使う作業名 |
+| `<base-dir>` | `$(pwd)/tmp` | run ディレクトリを作る親ディレクトリ |
 
 ### spawn-codex-tab.sh
 
@@ -63,7 +79,8 @@ tab を1枚立てて codex を起動する。
 
 ## 戻り値
 
-3本とも1行の JSON を返す。
+`spawn-codex-tab.sh`、`wait-codex-tabs.sh`、`resume-codex-tab.sh` の3本は1行の JSON を返す。
+`init-run-dir.sh` は作成したディレクトリの絶対パスを1行で返す。
 `status` で分岐する。
 
 | status | 意味 | 呼び出し元の対応 |
