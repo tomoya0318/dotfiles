@@ -36,7 +36,7 @@
 `<論点名>` は英数字、ハイフン、アンダースコアだけの短い名前にしてください。
 
 ```
-bash /Users/tomoya-n/.local/share/chezmoi/skills/start-implementation/scripts/spawn-codex-tab.sh \
+bash /Users/tomoya-n/.local/share/chezmoi/skills/run-codex-tab/scripts/spawn-codex-tab.sh \
   --name consult-<論点名> --role consult \
   --model gpt-5.6-sol --sandbox read-only --effort xhigh \
   --cwd <repo-root> \

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Codex Tab"
+  short_description: "Codexを別タブで起動し、実装・検証・相談を委譲する"
+  default_prompt: "$run-codex-tab を使って、Codex を別タブで起動して作業を委譲してください。"

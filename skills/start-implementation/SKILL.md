@@ -111,14 +111,14 @@ run を分け、各 run に担当する `要件` を明示する。`review.md` �
 4. ユーザーが計画検証を求めた場合のみ、[plan-review-prompt.md](references/plan-review-prompt.md) の入力プレースホルダー（`<work-dir>`、`<result-file>`）を具体的な値で置換し、`<work>/plan-review-prompt.md` へ書き出して fresh な codex に渡す。
 
    ```
-   scripts/spawn-codex-tab.sh --name review-plan --role review \
+   ../run-codex-tab/scripts/spawn-codex-tab.sh --name review-plan --role review \
      --cwd <repo-root> --effort xhigh \
      --prompt-file <work>/plan-review-prompt.md \
      --result-file <work>/plan-review-result.md --no-wait
    ```
 
    herdr の tab が1枚立ち、そこで codex が動く。
-   起動と待ちと status の扱いは [run-in-tab.md](references/run-in-tab.md) に従う。
+   起動と待ちと status の扱いは [run-in-tab.md](../run-codex-tab/references/run-in-tab.md) に従う。
 5. 手順4を行った場合は、指摘を計画へ反映し、`review.md` の「計画検証」の表の `対応` 列を埋める。
    `要件` が増えたなら、分割をもう一度判定する。
 6. `plan.md` のパスをユーザーへ伝え、`要件` と `方針` の見出しを列挙して承認を求める。
@@ -129,22 +129,22 @@ run を分け、各 run に担当する `要件` を明示する。`review.md` �
    書き出した `<work>/impl-prompt-<name>.md` を渡す。
 
    ```
-   scripts/spawn-codex-tab.sh --name impl-<name> --role impl \
+   ../run-codex-tab/scripts/spawn-codex-tab.sh --name impl-<name> --role impl \
      --cwd <repo-root> --effort <effort> \
      --prompt-file <work>/impl-prompt-<name>.md \
      --result-file <work>/impl-result-<name>.md --no-wait
    ```
 
    herdr の tab が1枚立ち、そこで codex が動く。ユーザーが進行を見られ、その場で介入できる。
-   引数と戻り値と落とし穴は [run-in-tab.md](references/run-in-tab.md) にある。読むのは status で迷ったときでよい。
+   引数と戻り値と落とし穴は [run-in-tab.md](../run-codex-tab/references/run-in-tab.md) にある。読むのは status で迷ったときでよい。
 
-   1本でも `--no-wait` で起動し、`scripts/wait-codex-tabs.sh` で待つ。
+   1本でも `--no-wait` で起動し、`../run-codex-tab/scripts/wait-codex-tabs.sh` で待つ。
    Bash ツールは10分で切れるので、`--timeout 540` を返るまで呼び直す。待ちの間はトークンを消費しない。
 
    effort は `xhigh` を既定にする。方針が確定していて機械的な作業なら `high` にする。
 
    `needs-user` が返ったら、`issue` の論点をユーザーへ提示して回答を得る。
-   main が代わりに判断しない。回答は `scripts/resume-codex-tab.sh` で止まっている tab へ届ける。
+   main が代わりに判断しない。回答は `../run-codex-tab/scripts/resume-codex-tab.sh` で止まっている tab へ届ける。
    `no-result` と `pane-gone` は tab を開いて原因を読み、ユーザーへ伝える。
 
    codex CLI が無い環境では fresh な subagent に委譲する。
@@ -154,7 +154,7 @@ run を分け、各 run に担当する `要件` を明示する。`review.md` �
 8. ユーザーが実装検証を求めた場合のみ、[impl-review-prompt.md](references/impl-review-prompt.md) の入力プレースホルダー（`<work-dir>`、`<result-file>`）を具体的な値に置換し、`<work>/impl-review-prompt.md` へ書き出して実装者とは別の fresh な codex に渡す。
 
    ```
-   scripts/spawn-codex-tab.sh --name review-<name> --role review \
+   ../run-codex-tab/scripts/spawn-codex-tab.sh --name review-<name> --role review \
      --cwd <repo-root> --effort <effort> \
      --prompt-file <work>/impl-review-prompt.md \
      --result-file <work>/impl-review-result.md --no-wait
