@@ -90,5 +90,21 @@
     },
     "editor.fontSize": 14,
     "terminal.integrated.fontSize": 13,
-    "markdown.preview.fontSize": 16
+    "markdown.preview.fontSize": 16,
+    "projectManager.git.baseFolders": [
+        "~/dev",
+        "~/.local/share/chezmoi"
+    ],
+    "projectManager.git.maxDepthRecursion": 3,
+    "projectManager.git.ignoredFolders": [
+        "node_modules",
+        ".git",
+        "out",
+        "dist",
+        "typings",
+        "test",
+        ".haxelib"
+    ],
+    "projectManager.openInCurrentWindowIfEmpty": "always",
+    "projectManager.removeCurrentProjectFromList": true
 }
