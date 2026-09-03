@@ -36,7 +36,8 @@ focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 # Ghostty が cmd+X を ESC+文字 に変換して送ってくる（dot_config/ghostty/config を参照）。
 # alt+文字 は物理キーでもあるため、割り当てた文字は内側のアプリから失われる。
 # 奪うもの: d(kill-word) t(transpose-words) g(get-line) h(run-help) l(down-case-word)
-#           n/p(history-search) w(copy-region-as-kill)。fzf の alt+c は避けている。
+#           n/p(history-search) w(copy-region-as-kill)。e は zsh 未割り当て。
+#           fzf の alt+c は避けている。
 next_agent = "alt+n"
 previous_agent = "alt+p"
 new_workspace = "alt+shift+n"
@@ -61,6 +62,14 @@ key = "prefix+g"
 type = "pane"
 command = "~/.local/bin/herdr-git-menu"
 description = "Git/worktree メニューを開く"
+
+# cmd+e: 現在のペインの cwd を VS Code で開く。
+# -r (--reuse-window) は既存ウィンドウの中身を差し替えてしまうため使わない。
+[[keys.command]]
+key = "alt+e"
+type = "shell"
+command = 'code "${HERDR_ACTIVE_PANE_CWD:-$PWD}"'
+description = "cwd を VS Code で開く"
 
 [theme]
 name = "catppuccin"

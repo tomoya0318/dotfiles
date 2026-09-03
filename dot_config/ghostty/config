@@ -38,6 +38,7 @@ keybind = super+shift+d=text:\x1bD
 keybind = super+w=text:\x1bw
 keybind = super+t=text:\x1bt
 keybind = super+g=text:\x1bg
+keybind = super+e=text:\x1be
 keybind = super+alt+arrow_left=text:\x1bh
 keybind = super+alt+arrow_down=text:\x1bj
 keybind = super+alt+arrow_up=text:\x1bk
