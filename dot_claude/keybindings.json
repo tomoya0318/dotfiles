@@ -5,38 +5,9 @@
     {
       "context": "Chat",
       "bindings": {
-        "enter": "chat:newline",
-        "alt+enter": "chat:submit"
-      }
-    },
-    {
-      "context": "Select",
-      "bindings": {
-        "enter": "select:accept"
-      }
-    },
-    {
-      "context": "Confirmation",
-      "bindings": {
-        "enter": "confirm:yes"
-      }
-    },
-    {
-      "context": "MessageSelector",
-      "bindings": {
-        "enter": "messageSelector:select"
-      }
-    },
-    {
-      "context": "DiffDialog",
-      "bindings": {
-        "enter": "diff:viewDetails"
-      }
-    },
-    {
-      "context": "Footer",
-      "bindings": {
-        "enter": "footer:openSelected"
+        "enter": "chat:submit",
+        "alt+enter": "chat:submit",
+        "shift+enter": "chat:newline"
       }
     }
   ]

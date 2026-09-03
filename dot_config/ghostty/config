@@ -18,10 +18,9 @@ tab-inherit-working-directory = false
 window-inherit-working-directory = false
 
 # --- Keybind ---
-# 既定の super+enter=toggle_fullscreen を置き換え、cmd+Enter を
-# Option/Alt+Enter 相当の ESC+CR として中のアプリへ渡す。
-# Claude Code と Codex TUI はともに alt-enter を送信キーに使う。
-# （フルスクリーンは super+ctrl+f に退避）
+# cmd+Enter を Option/Alt+Enter 相当の ESC+CR として中のアプリへ渡す。
+# Claude Code / Codex TUI 側で alt-enter も送信キーに割り当て、Enter と併用する。
+# （既定の super+enter=toggle_fullscreen は super+ctrl+f へ退避）
 keybind = super+enter=text:\x1b\x0d
 keybind = super+ctrl+f=toggle_fullscreen
 
