@@ -62,3 +62,16 @@ fi
 
 # --- エイリアス ---
 alias dev='cd ~/dev'
+
+# --- chezmoi ---
+# `chezmoi cd` は子シェルではなく、現在のシェルをソースディレクトリへ移動する。
+chezmoi() {
+  if [[ ${1-} == cd && $# -eq 1 ]]; then
+    local source_dir
+    source_dir="$(command chezmoi source-path)" || return
+    builtin cd -- "$source_dir"
+    return
+  fi
+
+  command chezmoi "$@"
+}
