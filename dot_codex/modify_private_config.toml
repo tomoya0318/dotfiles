@@ -30,15 +30,14 @@
 {{- if hasKey $keymap "composer" -}}
 {{-   $composer = get $keymap "composer" -}}
 {{- end -}}
-{{- /* Enter と cmd+Enter(=Ghostty が alt-enter として中継) の両方で送信する。 */ -}}
-{{- $_ := set $composer "submit" (list "enter" "alt-enter") -}}
+{{- $_ := set $composer "submit" "alt-enter" -}}
 {{- $_ := set $keymap "composer" $composer -}}
 {{- $editor := dict -}}
 {{- if hasKey $keymap "editor" -}}
 {{-   $editor = get $keymap "editor" -}}
 {{- end -}}
-{{- /* 既定の insert_newline から alt-enter を外し、送信キーとの衝突を避ける。 */ -}}
-{{- $_ := set $editor "insert_newline" (list "ctrl-j" "shift-enter") -}}
+{{- /* Codex の既定値にも alt-enter が含まれるため、送信キーとの衝突を避ける。 */ -}}
+{{- $_ := set $editor "insert_newline" (list "ctrl-j" "ctrl-m" "enter" "shift-enter") -}}
 {{- $_ := set $keymap "editor" $editor -}}
 {{- $_ := set $tui "keymap" $keymap -}}
 {{- $_ := set $cfg "tui" $tui -}}
