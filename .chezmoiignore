@@ -40,3 +40,16 @@ raycast_scripts/
 # --- Python bytecode ---
 **/__pycache__/
 **/*.pyc
+
+# herdr が生成・更新するエージェント連携フック。
+# ファイル自身が「managed by herdr、再インストールで上書きされる」と宣言しており、
+# chezmoi と二重管理すると integration の更新が apply で巻き戻る。
+# 新しいマシンでは `herdr integration install <target>` で入れる。
+#
+# 登録側（settings.json / hooks.json）は chezmoi が正本のまま。
+# modify_private_settings.json が settings.json を丸ごと生成するためで、
+# herdr が install のたびに絶対パス形式の重複を足すが、apply が消す。
+.claude/hooks/herdr-agent-state.sh
+.codex/herdr-agent-state.sh
+.codex/hooks/herdr-agent-state.sh
+.copilot/hooks/herdr-agent-state.sh
