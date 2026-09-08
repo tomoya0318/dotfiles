@@ -1,0 +1,8 @@
+# コミット署名を検証するための許可リスト (~/.config/git/allowed_signers)
+#
+# 書式: <メールアドレス> [オプション] <鍵タイプ> <公開鍵>
+# 鍵を替えたときは古い行を消さずに追記する。消すと過去のコミットが検証できなくなる。
+#
+# namespaces="git" は、git 以外の用途で作られた署名が
+# コミット署名として通ることを防ぐ。
+tmox13e@gmail.com namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJg2dx4+Yd4L99k4uEmnmLnYxEE+1cMlqGN1WqPyIgXZ
