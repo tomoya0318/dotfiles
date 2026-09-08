@@ -2,6 +2,9 @@
 
 export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:/usr/local/bin:{{ else }}/home/tomoya-n/.nix-profile/bin:{{ end }}$PATH"
 
+# 捕捉用の headless セッションからは通知を出さない（再帰ガード）
+[ -n "${WIKI_CAPTURE:-}" ] && exit 0
+
 input=$(cat)
 
 cwd=$(echo "$input" | jq -r '.cwd')
