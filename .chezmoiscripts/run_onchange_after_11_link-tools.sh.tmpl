@@ -1,4 +1,9 @@
 #!/bin/bash
+# tools/ の構成か、~/dev の symlink の状態が変わったら再実行:
+# state: {{ output "sh" "-c" (printf `for t in %s/tools/*/; do n=${t%%/}; n=${n##*/}; printf "%%s|%%s\n" "$n" "$(readlink "$HOME/dev/$n" 2>/dev/null)"; done` .chezmoi.sourceDir) | sha256sum }}
+#
+# 無条件の run スクリプトにすると chezmoi verify が常に保留を報告する。
+# ~/dev 側の状態もトリガに含めているので、symlink を手で消しても次の apply で戻る。
 # chezmoiリポジトリ直下の tools/<name>/ を ~/dev/<name> から参照させる。
 # コピーではなく symlink にするのは、~/dev 側を編集しても apply で
 # 巻き戻らないようにするため。実体は常にひとつ。

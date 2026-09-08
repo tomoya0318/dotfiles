@@ -1,4 +1,9 @@
 #!/bin/bash
+# skills/ の構成か、配布先の symlink の状態が変わったら再実行:
+# state: {{ output "sh" "-c" (printf `for s in %s/skills/*/; do n=${s%%/}; n=${n##*/}; printf "%%s|%%s|%%s\n" "$n" "$(readlink "$HOME/.claude/skills/$n" 2>/dev/null)" "$(readlink "$HOME/.agents/skills/$n" 2>/dev/null)"; done; for t in "$HOME/.claude/skills" "$HOME/.agents/skills"; do for l in "$t"/*; do [ -L "$l" ] && printf "link|%%s|%%s\n" "${l##*/}" "$(readlink "$l")"; done; done` .chezmoi.sourceDir) | sha256sum }}
+#
+# 無条件の run スクリプトにすると chezmoi verify が常に保留を報告する。
+# 配布先の状態もトリガに含めているので、symlink を手で消しても次の apply で戻る。
 # chezmoiリポジトリ直下の skills/<skill-name>/ を、Claude/Codex双方の
 # ユーザーグローバルスキルとして直接参照させる。
 set -euo pipefail
