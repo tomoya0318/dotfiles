@@ -7,7 +7,6 @@
 brew "git"
 brew "chezmoi"
 brew "fzf"
-brew "gum"
 brew "ripgrep"
 brew "fd"
 brew "jq"

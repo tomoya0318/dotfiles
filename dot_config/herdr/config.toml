@@ -12,25 +12,9 @@ new_cwd = "follow"
 # ctrl+a はシェル・Claude Code・codex の行頭移動として使うため返した。
 prefix = "ctrl+q"
 
-# ビルトインのキーバインド一覧は F1 へ退避（prefix+? は日本語チートシートに使う）
-help = "f1"
-
 # navigate モードは cmd+g から直接開く。Space の移動はここに集約し、
 # workspace_picker には cmd を割り当てない（prefix+w は残る）。
 goto = "alt+g"
-
-# worktree 操作は Git/worktree メニューに集約する
-new_worktree = ""
-
-# ペイン分割は tmux 慣習に合わせる（左右分割は | / デフォルトの prefix+v は無効化）
-split_vertical = ["prefix+|", "alt+d"]
-split_horizontal = ["prefix+minus", "alt+shift+d"]
-
-# vim 風 + 矢印キーでのペイン移動（hjkl はそのまま残す）
-focus_pane_left = ["prefix+h", "prefix+left", "alt+h"]
-focus_pane_down = ["prefix+j", "prefix+down", "alt+j"]
-focus_pane_up = ["prefix+k", "prefix+up", "alt+k"]
-focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 
 # --- cmd 系の direct binding ---
 # Ghostty が cmd+X を ESC+文字 に変換して送ってくる（dot_config/ghostty/config を参照）。
@@ -38,30 +22,23 @@ focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 # 奪うもの: d(kill-word) t(transpose-words) g(get-line) h(run-help) l(down-case-word)
 #           n/p(history-search) w(copy-region-as-kill)。e は zsh 未割り当て。
 #           fzf の alt+c は避けている。
+# ペイン分割・ペイン移動は cmd 系のみ（prefix 版は使わないので割り当てない）
+split_vertical = "alt+d"
+split_horizontal = "alt+shift+d"
+focus_pane_left = "alt+h"
+focus_pane_down = "alt+j"
+focus_pane_up = "alt+k"
+focus_pane_right = "alt+l"
+
 next_agent = "alt+n"
 previous_agent = "alt+p"
 new_workspace = "alt+shift+n"
-open_notification_target = "prefix+o"
-close_pane = ["prefix+x", "alt+w"]
-new_tab = ["prefix+c", "alt+t"]
-switch_tab = ["prefix+1..9", "alt+1..9"]
+close_pane = "alt+w"
+new_tab = "alt+t"
+switch_tab = "alt+1..9"
 
 # send-prefix はビルトイン: prefix を2回押す（Ctrl-q Ctrl-q）と literal な
 # Ctrl-q が中のアプリへ送られる。設定不要。
-
-# --- 日本語チートシート（Gum pager、一時ペインで表示） ---
-[[keys.command]]
-key = "prefix+?"
-type = "pane"
-command = "~/.local/bin/herdr-cheatsheet"
-description = "日本語チートシートを表示"
-
-# --- Git/worktree メニュー（2キー目: g/n/o/d） ---
-[[keys.command]]
-key = "prefix+g"
-type = "pane"
-command = "~/.local/bin/herdr-git-menu"
-description = "Git/worktree メニューを開く"
 
 # cmd+e: 現在のペインの cwd を VS Code で開く。
 # -r (--reuse-window) は既存ウィンドウの中身を差し替えてしまうため使わない。
@@ -76,7 +53,7 @@ name = "catppuccin"
 auto_switch = false
 
 [ui]
-# 選択中ペイン・一時ペインを含む枠線はCatppuccin Blueで統一
+# 選択中ペインの枠線はCatppuccin Blueで統一
 accent = "#89b4fa"
 agent_panel_sort = "spaces"
 show_agent_labels_on_pane_borders = false
