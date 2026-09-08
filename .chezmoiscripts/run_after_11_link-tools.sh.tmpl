@@ -10,6 +10,14 @@ dev_root="$HOME/dev"
 [ -d "$source_root" ] || exit 0
 mkdir -p "$dev_root"
 
+# 正本から消えた tool の symlink を刈る。
+for link in "$dev_root"/*; do
+  [ -L "$link" ] || continue
+  case "$(readlink "$link")" in
+    "$source_root"/*) [ -e "$link" ] || rm "$link" ;;
+  esac
+done
+
 for tool_source in "$source_root"/*; do
   [ -d "$tool_source" ] || continue
 

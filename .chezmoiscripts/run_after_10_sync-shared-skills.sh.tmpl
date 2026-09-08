@@ -23,6 +23,21 @@ link_skill() {
   fi
 }
 
+# 正本から消えた skill の symlink を刈る。刈らないと、skill を削除するたびに
+# 参照先の無いリンクが両エージェントのディレクトリに残り続ける。
+prune_stale_links() {
+  local dir="$1"
+  [ -d "$dir" ] || return 0
+
+  local link
+  for link in "$dir"/*; do
+    [ -L "$link" ] || continue
+    case "$(readlink "$link")" in
+      "$source_root"/*) [ -e "$link" ] || rm "$link" ;;
+    esac
+  done
+}
+
 for skill_source in "$source_root"/*; do
   [ -d "$skill_source" ] || continue
   [ -f "$skill_source/SKILL.md" ] || continue
@@ -32,3 +47,6 @@ for skill_source in "$source_root"/*; do
   link_skill "$HOME/.agents/skills/$skill_name" "$skill_source"
   link_skill "$HOME/.claude/skills/$skill_name" "$skill_source"
 done
+
+prune_stale_links "$HOME/.agents/skills"
+prune_stale_links "$HOME/.claude/skills"
