@@ -1,0 +1,30 @@
+#!/bin/bash
+# herdr のエージェント連携フックが古くなったら更新する。
+#
+# 下の状態が変わったときだけ再実行される:
+# herdr: {{ output "sh" "-c" "command -v herdr >/dev/null && herdr integration status 2>/dev/null || true" | sha256sum }}
+#
+# これらのフックは herdr が生成し「再インストールで上書きされる」と宣言している
+# ため、chezmoi の管理から外してある (.chezmoiignore)。管理外にすると更新が
+# 誰の仕事でもなくなるので、herdr 側の状態を見て追従させる。
+#
+# apply の「前」に置くのが要点。install は settings.json へ絶対パス形式の
+# 重複登録を足すが、この直後の apply が chezmoi 側の定義で上書きして消す。
+# after に置くと重複が残ったままになる。
+#
+# 更新するのは既に入っているものだけにする。未導入のものまで入れると、
+# 使っていないエージェントの設定ファイルが勝手に増える。
+set -euo pipefail
+
+command -v herdr >/dev/null 2>&1 || exit 0
+
+outdated=$(herdr integration status 2>/dev/null | awk -F: '/outdated/ {print $1}') || exit 0
+[ -n "$outdated" ] || exit 0
+
+for target in $outdated; do
+  if herdr integration install "$target" >/dev/null 2>&1; then
+    echo ">>> herdr integration を更新: $target"
+  else
+    echo ">>> herdr integration の更新に失敗: $target" >&2
+  fi
+done
