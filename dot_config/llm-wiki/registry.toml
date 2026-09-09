@@ -1,11 +1,13 @@
 # セッションの作業ディレクトリから、捕捉先の Wiki を決める対応表。
 #
 #   path  … 捕捉先の Wiki リポジトリ。inbox/ と .agents/prompts/capture.md を持つ
-#   match … そこへ振り分ける作業ディレクトリ。前方一致で判定する
+#   match … そこへ振り分ける作業ディレクトリ。前方一致で判定する。
+#           省略するとすべてのセッションが対象になる
 #
 # 上から順に評価し、最初に一致したものを使う。
-# どれにも一致しなければ捕捉しない。対象を明示したものだけに絞るための既定である。
+#
+# 残す価値があるかは内容が決めるので、作業ディレクトリでは絞らない。
+# 判定は各 Wiki の capture.md が行う。
 
 [[wiki]]
-path = "~/dev/personal-llm-wiki"
-match = ["~/dev", "~/.local/share/chezmoi"]
+path = "~/dev/llm-wiki/personal-llm-wiki"

@@ -43,16 +43,23 @@ for line in text.splitlines():
     elif cur is not None and line.startswith("match"):
         cur["match"] = re.findall(r'"([^"]+)"', line)
 
+def accept(entry):
+    wiki = os.path.realpath(os.path.expanduser(entry["path"]))
+    if os.path.isdir(os.path.join(wiki, "inbox")):
+        print(wiki)
+        sys.exit(0)
+
 for e in entries:
     if not e["path"]:
         continue
+    # match を書かないエントリは、すべてのセッションに一致する
+    if not e["match"]:
+        accept(e)
+        continue
     for m in e["match"]:
         base = os.path.realpath(os.path.expanduser(m))
-        if cwd == base or cwd.startswith(base + os.sep):
-            wiki = os.path.realpath(os.path.expanduser(e["path"]))
-            if os.path.isdir(os.path.join(wiki, "inbox")):
-                print(wiki)
-                sys.exit(0)
+        if cwd == base or cwd.startswith(base.rstrip(os.sep) + os.sep):
+            accept(e)
 sys.exit(1)
 PY
 }
