@@ -59,6 +59,15 @@ argument-hint: /skill-audit [プロジェクトルート | skills ディレク�
 | `artifact-name-drift` | どの `produces` にも無い `references` の名前。**`tmp/` 配下の成果物だけを比べる** |
 | `duplicate-source` | 同じ `rule` が 2 つ以上の skill に現れる。表記の揺れがあるので近似一致で見る |
 
+**fork 元を `duplicate-source` の対象にしない。** fork 先が fork 元の規律を写すのは fork そのもので、
+`AUDIT.md` が「落とした」「形を変えた」を持っている以上、**残りは写したものだと既に表現されている**。
+対象に入れると意図的な重複が毎回出て、直す気のないものを読まされる。写した規律の一覧も作らない。
+fork 元から差分を引けば求まるものを手で並べると、三重目の写しになって腐る。
+
+**自己完結のための最小限の再掲は重複ではない。** skill は 1 本ずつ読まれるので、
+`land-worktree` と `open-worktree` がどちらも「追跡外の `tmp/` は汚れに数えない」を持つのは正しい。
+報告するのは、再掲では説明できない量の重複と、同じ手順が 2 本にあって片方だけ直されている場合である。
+
 `artifact-name-drift` を全ファイル名で比べない。skill 群の外で作られるもの
 (`.claude/impl-workflow.md`、別リポジトリの文書、skill 自身の `references/`) が全部引っかかり、
 実際に 15 件出て全部が正しい参照だった。名前がずれるのは skill 間で受け渡す成果物だけで、
