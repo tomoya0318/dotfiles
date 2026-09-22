@@ -7,12 +7,8 @@ main のコンテキストには結果ファイルしか入らない。
 呼び出し側は main でも codex でもよい。
 階層が何段でも同じ引数で使える。
 
-## run ディレクトリ
-
-プロンプト、設定、結果ファイルの受け渡し場所は `scripts/init-run-dir.sh` で作る。
-引数に run 名と必要なら base directory を渡すと、`tmp/NNNN_<name>/` を作成し、その絶対パスを1行で返す。
-このディレクトリは Codex の `--cwd` ではなく、run 関連ファイルの置き場所として使う。
-コードを読む・変更するリポジトリのルートは、別途 `spawn-codex-tab.sh` の `--cwd` に指定する。
+run ディレクトリの作り方と YAML の書き方は `SKILL.md` が正本である。
+ここは引数・戻り値・pane キー・落とし穴の契約だけを持つ。
 
 ## スクリプト
 
@@ -48,10 +44,7 @@ tab を1枚立てて codex を起動する。
 | `--no-wait` | — | 起動だけして返す。並行実行で使う |
 | `--config` | — | 下記の YAML 設定を読み込む。CLI オプションが優先 |
 
-`--config` はトップレベルのスカラー項目だけを持つ YAML ファイルを受け付ける。
-`task`、`model`、`effort` は必須で、`task` は `impl`・`review`・`consult` のいずれかにする。
-`name`、`cwd`、`prompt_file`、`result_file`、`sandbox`、`timeout`、`parent`、`no_wait` も指定できる。
-`task: consult` では `sandbox: read-only` を指定し、結果ファイルの保存先を `--cwd` の外に置く。
+`--config` に書ける項目は `SKILL.md` にある。
 
 ### wait-codex-tabs.sh
 
