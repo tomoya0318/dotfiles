@@ -2,6 +2,7 @@
     "explorer.confirmDelete": false,
     "explorer.confirmDragAndDrop": false,
     "git.confirmSync": false,
+    "git.path": "/opt/homebrew/bin/git",
     "workbench.iconTheme": "material-icon-theme",
     "git.enableSmartCommit": true,
     "editor.unicodeHighlight.allowedLocales": {
