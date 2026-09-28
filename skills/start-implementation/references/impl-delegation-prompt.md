@@ -38,7 +38,7 @@
 ```
 bash /Users/tomoya-n/.local/share/chezmoi/skills/run-codex-tab/scripts/spawn-codex-tab.sh \
   --name consult-<論点名> --role consult \
-  --model gpt-5.6-sol --sandbox read-only --effort xhigh \
+  --sandbox read-only --effort xhigh \
   --cwd <repo-root> \
   --prompt-file <work>/consult-<n>-prompt.md \
   --result-file <work>/consult-<n>-result.md

@@ -36,7 +36,7 @@ tab を1枚立てて codex を起動する。
 | `--prompt-file` | 必須 | プロンプト。起動時に argv で渡す |
 | `--result-file` | 必須 | codex に書かせる結果ファイル。決着の判定に使う |
 | `--role` | `impl` | `impl` / `review` / `consult` |
-| `--model` | `gpt-5.6-luna` | 相談だけ `gpt-5.6-sol` |
+| `--model` | role ごとの既定 | スクリプト参照。上位モデルを指示されたときだけ指定 |
 | `--effort` | `xhigh` | |
 | `--sandbox` | `workspace-write` | 相談は `read-only` |
 | `--timeout` | `1800` | 秒 |

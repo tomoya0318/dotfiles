@@ -32,7 +32,6 @@ run ディレクトリを作り、プロンプトと結果ファイルをそこ�
 ```bash
 # <config.yaml>
 task: impl
-model: gpt-5.6-luna
 effort: xhigh
 sandbox: workspace-write
 name: impl-feature-name
@@ -47,7 +46,8 @@ bash <skill-dir>/scripts/spawn-codex-tab.sh --config <config.yaml>
 ```
 
 YAML はトップレベルのスカラー項目だけを受け付ける。
-`task`、`model`、`effort` は毎回明示し、`task` は `impl`・`review`・`consult` のいずれかにする。
+`task`、`effort` は毎回明示し、`task` は `impl`・`review`・`consult` のいずれかにする。
+`model` は省略すると `task` に応じたスクリプトの既定が入る。既定より上位のモデルを使うと指示されたときだけ明示する。
 `name` はタブと pane のラベルになるため、英数字・ハイフン・アンダースコアだけの短い名前にする。
 `cwd` は Codex が実際に作業するリポジトリのルートを必ず指定する。
 `prompt_file` には目的、担当範囲、変更してよい範囲、検証方法、結果ファイルへの報告形式を書く。
@@ -60,11 +60,11 @@ YAML の読み込みに失敗した場合は `spawn-failed` として返る。
 
 役割ごとの推奨設定は次のとおりとする。
 
-| role | 用途 | sandbox | model / effort |
+| role | 用途 | sandbox | effort |
 |---|---|---|---|
-| `impl` | コードや成果物の実装 | `workspace-write` | `gpt-5.6-luna` / `xhigh` |
-| `review` | 差分・計画・成果物の検証 | `workspace-write` または指示に合わせる | `gpt-5.6-luna` / `xhigh` |
-| `consult` | 上位モデルへの読み取り専用相談 | `read-only` | `gpt-5.6-sol` / `xhigh` |
+| `impl` | コードや成果物の実装 | `workspace-write` | `xhigh` |
+| `review` | 差分・計画・成果物の検証 | `workspace-write` または指示に合わせる | `xhigh` |
+| `consult` | 上位モデルへの読み取り専用相談 | `read-only` | `xhigh` |
 
 `review` を指摘だけに限定する場合は、プロンプトで編集可能なファイルを結果ファイルなどに限定する。
 `consult` は `--sandbox read-only` を指定し、結果ファイルの保存先を `--cwd` の外に置く。

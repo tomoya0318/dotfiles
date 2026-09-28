@@ -13,8 +13,9 @@
 {{- $_ := set $cfg "approvals_reviewer" "auto_review" -}}
 {{- $_ := set $cfg "service_tier" "default" -}}
 {{- if not (hasKey $cfg "model") -}}
-{{-   $_ := set $cfg "model" "gpt-5.6-terra" -}}
+{{-   $_ := set $cfg "model" "gpt-6-luna" -}}
 {{- end -}}
+{{- $_ := set $cfg "model_reasoning_effort" "xhigh" -}}
 {{- $_ := set $cfg "personality" "pragmatic" -}}
 {{- $_ := set $cfg "model_verbosity" "low" -}}
 {{- $_ := set $cfg "model_reasoning_summary" "concise" -}}

@@ -5,7 +5,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_codex-tab-lib.sh"
 
 NAME=""; CWD=""; PROMPT_FILE=""; RESULT_FILE=""; CONFIG_FILE=""
-ROLE="impl"; MODEL="gpt-5.6-luna"; EFFORT="xhigh"; SANDBOX="workspace-write"
+ROLE="impl"; MODEL=""; EFFORT="xhigh"; SANDBOX="workspace-write"
 TIMEOUT=1800; WAIT_DONE=1; PARENT="${HERDR_PANE_ID:-}"
 
 die() { emit_json status spawn-failed error "$1"; exit 1; }
@@ -50,6 +50,9 @@ case "$ROLE" in
   impl|review|consult) ;;
   *) die "--task/--role must be impl, review, or consult" ;;
 esac
+if [[ -z "$MODEL" ]]; then
+  if [[ "$ROLE" == "consult" ]]; then MODEL="gpt-6-sol"; else MODEL="gpt-6-luna"; fi
+fi
 if [[ "$ROLE" == "consult" && "$SANDBOX" != "read-only" ]]; then
   die "consult requires --sandbox read-only"
 fi
