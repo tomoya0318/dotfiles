@@ -8,7 +8,9 @@
 {{-   end -}}
 {{- end -}}
 {{- $_ := set $cfg "notify" (list (printf "%s/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient" .chezmoi.homeDir) "turn-ended") -}}
-{{- $_ := set $cfg "sandbox_mode" "workspace-write" -}}
+{{- $_ := unset $cfg "sandbox_mode" -}}
+{{- $_ := unset $cfg "sandbox_workspace_write" -}}
+{{- $_ := set $cfg "default_permissions" "workspace-git-op" -}}
 {{- $_ := set $cfg "approval_policy" "on-request" -}}
 {{- $_ := set $cfg "approvals_reviewer" "auto_review" -}}
 {{- $_ := set $cfg "service_tier" "default" -}}
@@ -48,7 +50,23 @@
 {{- end -}}
 {{- $_ := set $features "js_repl" false -}}
 {{- $_ := set $features "hooks" true -}}
+{{- $_ := set $features "network_proxy" true -}}
 {{- $_ := set $cfg "features" $features -}}
+{{- $permissions := dict -}}
+{{- if hasKey $cfg "permissions" -}}
+{{-   $permissions = get $cfg "permissions" -}}
+{{- end -}}
+{{- $workspaceGitOp := dict "description" "Workspace edits with Git metadata and 1Password app and agent IPC" "extends" ":workspace" -}}
+{{- $workspaceFs := dict ":workspace_roots" (dict ".git" "write" ".git/config" "read" ".git/hooks" "read") -}}
+{{- $_ := set $workspaceGitOp "filesystem" $workspaceFs -}}
+{{- $workspaceNetwork := dict "enabled" true "domains" (dict) -}}
+{{- $unixSockets := dict -}}
+{{- $_ := set $unixSockets (printf "%s/Library/Group Containers/2BUA8C4S2C.com.1password/t/s.sock" .chezmoi.homeDir) "allow" -}}
+{{- $_ := set $unixSockets (printf "%s/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock" .chezmoi.homeDir) "allow" -}}
+{{- $_ := set $workspaceNetwork "unix_sockets" $unixSockets -}}
+{{- $_ := set $workspaceGitOp "network" $workspaceNetwork -}}
+{{- $_ := set $permissions "workspace-git-op" $workspaceGitOp -}}
+{{- $_ := set $cfg "permissions" $permissions -}}
 {{- if hasKey $cfg "tui" -}}
 {{-   $tui := get $cfg "tui" -}}
 {{-   $_ := unset $tui "notifications" -}}
