@@ -67,6 +67,12 @@
 {{- $_ := set $workspaceGitOp "network" $workspaceNetwork -}}
 {{- $_ := set $permissions "workspace-git-op" $workspaceGitOp -}}
 {{- $_ := set $cfg "permissions" $permissions -}}
+{{- $mcpServers := dict -}}
+{{- if hasKey $cfg "mcp_servers" -}}
+{{-   $mcpServers = get $cfg "mcp_servers" -}}
+{{- end -}}
+{{- $_ := set $mcpServers "chrome-devtools" (dict "command" "pnpm" "args" (list "dlx" "chrome-devtools-mcp@latest")) -}}
+{{- $_ := set $cfg "mcp_servers" $mcpServers -}}
 {{- if hasKey $cfg "tui" -}}
 {{-   $tui := get $cfg "tui" -}}
 {{-   $_ := unset $tui "notifications" -}}

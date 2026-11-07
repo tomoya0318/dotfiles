@@ -4,6 +4,7 @@
 # ここでは chezmoi apply のたびに「必要なキーだけ」を冪等に強制する。
 #   autoUpdates            : バックグラウンド自動更新を有効に保つ
 #   mcpServers.semble.alwaysLoad : semble のツールスキーマを常駐させる
+#   mcpServers.chrome-devtools   : chrome-devtools-mcp を pnpm dlx で起動する user スコープの MCP
 set -eu
 f="$HOME/.claude.json"
 [ -f "$f" ] || exit 0
@@ -13,8 +14,9 @@ trap 'rm -f "$tmp"' EXIT
 jq '
   .autoUpdates = true
   | if (.mcpServers.semble) then .mcpServers.semble.alwaysLoad = true else . end
+  | .mcpServers["chrome-devtools"] = {type: "stdio", command: "pnpm", args: ["dlx", "chrome-devtools-mcp@latest"], env: {}}
 ' "$f" > "$tmp"
 if ! cmp -s "$f" "$tmp"; then
   cat "$tmp" > "$f"
-  echo "chezmoi: ~/.claude.json の autoUpdates / semble.alwaysLoad を更新した"
+  echo "chezmoi: ~/.claude.json の autoUpdates / mcpServers を更新した"
 fi
