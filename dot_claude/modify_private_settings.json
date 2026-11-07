@@ -138,6 +138,11 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/notification.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/runcat-usage.sh",
+            "timeout": 10
           }
         ]
       }
