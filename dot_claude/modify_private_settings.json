@@ -1,5 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- /* effortLevel は chezmoi 管理外: 既存ファイルの値があればそれを尊重し、無ければ下記のフォールバックを使う。
+{{- /* effortLevel / model / modelSettings は chezmoi 管理外: 既存ファイルの値があればそれを尊重し、無ければ下記のフォールバックを使う。
        これにより /effort でセッション中に変更しても chezmoi diff が出ない。 */ -}}
 {{- $settings := (`{
   "includeCoAuthoredBy": false,
@@ -177,7 +177,7 @@
 {{- if hasKey .chezmoi "stdin" -}}
 {{-   if .chezmoi.stdin -}}
 {{-     $existing := (.chezmoi.stdin | fromJson) -}}
-{{-     range (list "effortLevel" "model") -}}
+{{-     range (list "effortLevel" "model" "modelSettings") -}}
 {{-       if hasKey $existing . -}}
 {{-         $_ := set $settings . (get $existing .) -}}
 {{-       end -}}
