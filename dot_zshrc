@@ -3,11 +3,11 @@ if [ -x /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# --- PATH ---
-export PATH="$HOME/.local/bin:$HOME/Library/pnpm:$PATH"
-
 # --- 環境変数 ---
 export PNPM_HOME="$HOME/Library/pnpm"
+
+# --- PATH ---
+export PATH="$HOME/.local/bin:$PNPM_HOME/bin:$PATH"
 
 # --- 履歴 ---
 HISTSIZE="1000000"

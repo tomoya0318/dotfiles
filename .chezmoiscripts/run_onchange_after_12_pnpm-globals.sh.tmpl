@@ -1,0 +1,20 @@
+#!/bin/bash
+# パッケージ一覧が変わったら再実行される。
+set -euo pipefail
+
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$PNPM_HOME/bin:$HOME/.local/share/mise/shims:$PATH"
+
+packages=(
+  @antfu/ni
+  @github/copilot
+  neovim
+)
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo ">>> pnpm が未準備、グローバルパッケージの導入をスキップ"
+  exit 0
+fi
+
+cd "$HOME"
+pnpm add -g "${packages[@]}"
