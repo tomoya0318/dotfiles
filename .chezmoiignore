@@ -16,6 +16,8 @@ Brewfile.mobile
 scripts/
 # agent skills はリポジトリ直下を正本とし、apply後に各エージェントへ同期する
 skills/
+# エージェント共通のグローバル指示の正本。~/.claude/CLAUDE.md と ~/.codex/AGENTS.md から symlink で参照する
+instructions/
 # tools/ も正本はリポジトリ直下。apply後に ~/dev/ へ symlink する
 tools/
 # docs/ はリポジトリ内部の手順書。ホームには展開しない
